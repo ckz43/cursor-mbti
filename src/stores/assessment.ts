@@ -7,6 +7,7 @@ export interface AssessmentState {
   answers: number[]
   finished: boolean
   paid: boolean
+  overrideType: string | null
 }
 
 const scaleValues = [1.5, 0.5, -0.5, -1.5] // 与选项顺序对应：非常符合→完全不符合
@@ -16,6 +17,7 @@ export const useAssessmentStore = defineStore('assessment', {
     answers: [],
     finished: false,
     paid: false,
+    overrideType: null,
   }),
   getters: {
     totalQuestions: () => mapping93.length,
@@ -30,6 +32,7 @@ export const useAssessmentStore = defineStore('assessment', {
       return scores
     },
     mbtiType(): string {
+      if (this.overrideType) return this.overrideType
       const s = this.dimensionScores as Record<DimensionKey, number>
       const e = s.EI >= 0 ? 'E' : 'I'
       const n = s.NS >= 0 ? 'N' : 'S'
@@ -53,6 +56,7 @@ export const useAssessmentStore = defineStore('assessment', {
       this.answers = []
       this.finished = false
       // 不重置 paid，允许同一用户多次测试且保留解锁状态
+      // 不重置 overrideType，便于开发者在一次会话内切换演示
     },
     recordAnswer(answerIdx: number) {
       this.answers.push(answerIdx)
@@ -62,6 +66,9 @@ export const useAssessmentStore = defineStore('assessment', {
     },
     setPaid(v: boolean) {
       this.paid = v
+    },
+    setOverrideType(type: string | null) {
+      this.overrideType = type
     }
   }
 })

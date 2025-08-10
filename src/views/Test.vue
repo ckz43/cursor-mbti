@@ -3,31 +3,18 @@
     <!-- 导航栏 -->
     <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-sm border-b border-gray-200">
       <nav class="container py-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <button 
-              class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors"
-              @click="goBack"
-            >
-              <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-              </svg>
-            </button>
-            <div>
-              <h1 class="font-bold text-gray-900">MBTI专业测评</h1>
-              <p class="text-xs text-gray-500">基于荣格心理学</p>
-            </div>
-          </div>
-          
-          <!-- 进度指示 -->
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-600">{{ currentStep }}/{{ totalSteps }}</span>
-            <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                class="h-full bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full transition-all duration-300"
-                :style="{ width: `${progress}%` }"
-              ></div>
-            </div>
+        <div class="flex items-center gap-3">
+          <button 
+            class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors"
+            @click="goBack"
+          >
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+          </button>
+          <div>
+            <h1 class="font-bold text-gray-900">MBTI专业测评</h1>
+            <p class="text-xs text-gray-500">基于荣格心理学</p>
           </div>
         </div>
       </nav>
@@ -94,7 +81,7 @@
               <div class="flex items-start gap-3">
                 <div class="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                   <svg class="w-3 h-3 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                   </svg>
                 </div>
                 <div>
@@ -121,9 +108,17 @@
 
         <!-- 测试问题（第2-94步） -->
         <div v-else-if="currentStep <= totalSteps" class="space-y-8">
-          <div class="text-center mb-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-2">问题 {{ currentStep - 1 }}</h2>
-            <p class="text-gray-600">请根据你的真实感受选择最符合的选项</p>
+          <div class="text-center mb-6">
+            <div class="inline-flex items-center gap-2 mb-3">
+              <span class="px-3 py-1.5 rounded-full bg-primary-50 text-primary-700 text-sm sm:text-base font-semibold shadow-sm">{{ currentCategoryName }}</span>
+            </div>
+            <div class="mx-auto max-w-xs sm:max-w-sm flex items-center gap-2 justify-center">
+              <div class="flex-1 h-2 bg-gray-200/80 rounded-full overflow-hidden shadow-inner">
+                <div class="h-full bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full transition-all duration-300" :style="{ width: `${categoryProgress}%` }"></div>
+              </div>
+              <span class="text-sm text-gray-600 tabular-nums">{{ categoryStep }}/{{ CATEGORY_SIZE }}</span>
+            </div>
+            <p class="text-gray-600 mt-3">请根据你的真实感受选择最符合的选项</p>
           </div>
 
           <div class="bg-white rounded-2xl p-8 shadow-soft">
@@ -192,12 +187,28 @@ const router = useRouter()
 // 先初始化全局答题 store，再使用其属性
 const store = useAssessmentStore()
 
+// ========= 题目分组（3类 × 31题）========= 
+// 仅供内部分组与后续拓展使用，UI保持无感切换；如需更改名称，仅修改此数组
+const CATEGORY_SIZE = 31
+const categoryNames = ref<string[]>(['基础偏好', '认知与思维', '情境与行为'])
+const categoryIndex = computed(() => {
+  const qIndex = Math.max(0, (currentStep.value - 2)) // 0-based题目索引
+  return Math.min(categoryNames.value.length - 1, Math.floor(qIndex / CATEGORY_SIZE))
+})
+const currentCategoryName = computed(() => categoryNames.value[categoryIndex.value])
+const categoryStep = computed(() => {
+  if (currentStep.value <= 1) return 0
+  const idx = currentStep.value - 2
+  return (idx % CATEGORY_SIZE) + 1
+})
+const categoryProgress = computed(() => Math.round((categoryStep.value / CATEGORY_SIZE) * 100))
+
 // 测试状态
 const currentStep = ref(1)
 const totalSteps = ref(store.totalQuestions + 1) // 1个介绍页 + 题目数
 const selectedAnswer = ref<number | null>(null)
 
-// 进度计算
+// 进度计算（总体，可保留备用）
 const progress = computed(() => {
   if (currentStep.value === 1) return 0
   return Math.round(((currentStep.value - 1) / (totalSteps.value - 1)) * 100)
@@ -205,9 +216,11 @@ const progress = computed(() => {
 
 // 题库：把93条描述转为题目对象 + 通用选项（裁剪到映射题数）
 const questions = ref(
-  questions93.slice(0, store.totalQuestions).map((q) => ({
+  questions93.slice(0, store.totalQuestions).map((q, idx) => ({
     question: q,
-    options: baseOptions
+    options: baseOptions,
+    // 内部分组标签，不在UI展示；若未来需要按组统计或插入过渡，可直接复用
+    category: categoryNames.value[Math.min(categoryNames.value.length - 1, Math.floor(idx / CATEGORY_SIZE))]
   }))
 )
 
@@ -236,10 +249,11 @@ const nextQuestion = () => {
     selectedAnswer.value = null
     
     if (currentStep.value === totalSteps.value) {
-      // 完成测试，立即跳转到结果
+      // 完成测试，进入生成中转页
       store.setFinished(true)
-      router.push('/result')
+      router.push('/generating')
     } else {
+      // 无感切换：当到达每类末尾题目后，继续进入下一题/下一类
       currentStep.value++
     }
   }
