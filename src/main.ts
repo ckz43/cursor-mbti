@@ -4,6 +4,7 @@ import { createRouter, createWebHistory, useRouter } from 'vue-router'
 import App from './App.vue'
 import './style.css'
 import { useAssessmentStore } from './stores/assessment'
+import { initializeDataServices, monitorDataService } from './services'
 
 // 先创建 pinia 以便在后续全局和组件中使用
 const pinia = createPinia()
@@ -98,7 +99,7 @@ const router = createRouter({
     {
       path: '/generating',
       name: 'Generating',
-      component: GeneratingRoute,
+      component: () => import('./views/Generating.vue'),
       meta: {
         title: '生成报告中 - MBTI性格分析'
       }
@@ -109,6 +110,14 @@ const router = createRouter({
       component: () => import('./views/Result.vue'),
       meta: {
         title: '测试结果 - MBTI性格分析'
+      }
+    },
+    {
+      path: '/debug',
+      name: 'Debug',
+      component: () => import('./views/Debug.vue'),
+      meta: {
+        title: '调试页面 - MBTI开发调试'
       }
     },
     {
@@ -193,5 +202,18 @@ app.directive('ripple', {
     })
   }
 })
+
+// 初始化数据服务
+initializeDataServices().then((success) => {
+  if (success) {
+    console.log('✅ 数据服务初始化成功');
+    // 启动性能监控
+    monitorDataService();
+  } else {
+    console.warn('⚠️ 数据服务初始化失败，但应用仍可正常运行');
+  }
+}).catch((error) => {
+  console.error('❌ 数据服务初始化异常:', error);
+});
 
 app.mount('#app')

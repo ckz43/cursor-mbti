@@ -93,7 +93,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
-                  <span>完全免费</span>
+                  <span>专业权威</span>
                 </div>
               </div>
             </div>
@@ -259,6 +259,91 @@
       </div>
     </section>
 
+    <!-- 找回报告悬浮按钮 -->
+    <div class="fixed right-4 sm:right-6 bottom-20 sm:bottom-24 z-50">
+      <button 
+        @click="showRecoverModal = true"
+        class="bg-gray-600 text-white px-3 py-4 rounded-lg shadow-lg flex flex-col items-center gap-1"
+        title="找回报告"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <span class="text-xs font-normal">找回<br>报告</span>
+      </button>
+    </div>
+
+    <!-- 找回报告弹窗 -->
+    <div v-if="showRecoverModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click.self="showRecoverModal = false">
+      <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
+        <!-- 弹窗头部 -->
+        <div class="relative bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-3xl">
+          <button 
+            @click="showRecoverModal = false"
+            class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors duration-200"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+          <div class="text-center">
+            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold mb-2">找回报告</h2>
+            <p class="text-blue-100">输入微信支付交易单号找回您的测试报告</p>
+          </div>
+        </div>
+
+        <!-- 弹窗内容 -->
+        <div class="p-6 space-y-6">
+          <!-- 输入框 -->
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">微信支付交易单号</label>
+              <input 
+                v-model="recoverInput"
+                type="text" 
+                placeholder="请输入微信支付交易单号"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900"
+              >
+            </div>
+            <button 
+              @click="handleRecover"
+              :disabled="!recoverInput.trim()"
+              class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              找回报告
+            </button>
+          </div>
+
+          <!-- 找回方法说明 -->
+          <div class="bg-gray-50 rounded-2xl p-5">
+            <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              找回报告的方法：
+            </h3>
+            <div class="space-y-3 text-sm text-gray-600">
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 flex-shrink-0">1</div>
+                <p class="leading-relaxed">在【微信支付】的支付记录中，找到您本次支付的订单，点击进入，显示如下图所示页面。</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 flex-shrink-0">2</div>
+                <p class="leading-relaxed">复制交易单号，粘贴到上面的输入框中，点击「找回报告」即可获得二维码。</p>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
     <!-- 页脚 -->
     <footer class="py-12 bg-gray-900 text-gray-300">
       <div class="container">
@@ -299,13 +384,35 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ScientificFoundation from '@/components/Authority/ScientificFoundation.vue'
 import FoundersSection from '@/components/Authority/FoundersSection.vue'
 
 const router = useRouter()
 
+// 找回报告相关状态
+const showRecoverModal = ref(false)
+const recoverInput = ref('')
+
 const startTest = () => {
   router.push('/test')
+}
+
+const handleRecover = () => {
+  if (!recoverInput.value.trim()) {
+    return
+  }
+  
+  // 这里可以添加实际的找回逻辑
+  // 比如调用API根据交易单号查询报告
+  console.log('根据交易单号查找报告:', recoverInput.value)
+  
+  // 模拟查找过程
+  alert(`正在根据交易单号为您查找报告，请稍候...\n交易单号：${recoverInput.value}`)
+  
+  // 清空输入并关闭弹窗
+  recoverInput.value = ''
+  showRecoverModal.value = false
 }
 </script>

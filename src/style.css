@@ -236,6 +236,22 @@
   }
 }
 
+/* 弹窗缩放入场动画 */
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
 ::-webkit-scrollbar-track {
   background: #f1f5f9;
 }

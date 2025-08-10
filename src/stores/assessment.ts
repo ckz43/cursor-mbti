@@ -14,9 +14,15 @@ const scaleValues = [1.5, 0.5, -0.5, -1.5] // 与选项顺序对应：非常符�
 
 export const useAssessmentStore = defineStore('assessment', {
   state: (): AssessmentState => ({
-    answers: [],
-    finished: false,
-    paid: false,
+    answers: [
+      // 创建更合理的测试数据分布 - 生成ENFP类型
+      ...Array(23).fill(0).map(() => Math.floor(Math.random() * 2)), // EI维度：偏向E
+      ...Array(23).fill(0).map(() => Math.floor(Math.random() * 3) + 1), // NS维度：偏向N
+      ...Array(24).fill(0).map(() => Math.floor(Math.random() * 2) + 2), // TF维度：偏向F
+      ...Array(23).fill(0).map(() => Math.floor(Math.random() * 2))  // JP维度：偏向P
+    ],
+    finished: true, // 设置为已完成
+    paid: true, // 设置为已付费
     overrideType: null,
   }),
   getters: {
@@ -45,10 +51,33 @@ export const useAssessmentStore = defineStore('assessment', {
       return flipType(this.mbtiType)
     },
     proportions(): Record<DimensionKey, number> {
-      // 归一化到 0-100 用于可视化；当答案为空时返回0，避免 undefined 报错
+      // 归一化到 0-100 用于可视化；当答案为空时返回50（中性）
       const s = this.dimensionScores as Record<DimensionKey, number>
-      const normalize = (x: number) => Math.max(0, Math.min(100, Math.round(((x ?? 0) + 30) / 60 * 100)))
-      return { EI: normalize(s.EI ?? 0), NS: normalize(s.NS ?? 0), TF: normalize(s.TF ?? 0), JP: normalize(s.JP ?? 0) }
+      
+      // 计算每个维度的题目数量
+      const dimensionCounts: Record<DimensionKey, number> = { EI: 0, NS: 0, TF: 0, JP: 0 }
+      mapping93.forEach(map => {
+        dimensionCounts[map.dimension]++
+      })
+      
+      const normalize = (score: number, dimension: DimensionKey) => {
+        if (this.answers.length === 0) return 50 // 未答题时显示中性
+        
+        // 计算该维度的理论最大分数（题目数 × 1.5）
+        const maxScore = dimensionCounts[dimension] * 1.5
+        
+        // 将分数从 [-maxScore, +maxScore] 映射到 [0, 100]
+        // 负分表示第二个字母（I/S/F/P），正分表示第一个字母（E/N/T/J）
+        const percentage = Math.max(0, Math.min(100, Math.round(((score + maxScore) / (2 * maxScore)) * 100)))
+        return percentage
+      }
+      
+      return { 
+        EI: normalize(s.EI ?? 0, 'EI'), 
+        NS: normalize(s.NS ?? 0, 'NS'), 
+        TF: normalize(s.TF ?? 0, 'TF'), 
+        JP: normalize(s.JP ?? 0, 'JP') 
+      }
     }
   },
   actions: {

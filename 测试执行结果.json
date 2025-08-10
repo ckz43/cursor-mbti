@@ -1,0 +1,384 @@
+{
+  "summary": {
+    "total": 53,
+    "passed": 53,
+    "failed": 0,
+    "skipped": 0,
+    "duration": "8ms",
+    "passRate": "100.00"
+  },
+  "results": [
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: src/services/dataService.ts",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.051Z"
+    },
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: src/services/localStorageService.ts",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.051Z"
+    },
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: src/services/database.ts",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.051Z"
+    },
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: src/services/index.ts",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.051Z"
+    },
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: src/stores/assessment.ts",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.051Z"
+    },
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: src/stores/enhancedAssessment.ts",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.051Z"
+    },
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: src/views/Home.vue",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: src/views/Test.vue",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: src/views/Generating.vue",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: src/views/Result.vue",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: src/views/Report.vue",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: src/main.ts",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: package.json",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "FileSystem",
+      "testName": "检查关键文件: vite.config.ts",
+      "status": "PASS",
+      "details": "文件存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "DataService",
+      "testName": "检查数据服务方法: createUser",
+      "status": "PASS",
+      "details": "方法存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "DataService",
+      "testName": "检查数据服务方法: getUserById",
+      "status": "PASS",
+      "details": "方法存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "DataService",
+      "testName": "检查数据服务方法: createTestSession",
+      "status": "PASS",
+      "details": "方法存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "DataService",
+      "testName": "检查数据服务方法: getTestHistory",
+      "status": "PASS",
+      "details": "方法存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "DataService",
+      "testName": "检查数据服务方法: saveAnswer",
+      "status": "PASS",
+      "details": "方法存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "DataService",
+      "testName": "检查数据服务方法: getSessionAnswers",
+      "status": "PASS",
+      "details": "方法存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "DataService",
+      "testName": "检查数据服务方法: createPaymentOrder",
+      "status": "PASS",
+      "details": "方法存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "DataService",
+      "testName": "检查数据服务方法: getPaymentOrderById",
+      "status": "PASS",
+      "details": "方法存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "DataService",
+      "testName": "检查数据服务方法: saveBehaviorLog",
+      "status": "PASS",
+      "details": "方法存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "DataService",
+      "testName": "检查数据服务方法: createShareRecord",
+      "status": "PASS",
+      "details": "方法存在",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "DataService",
+      "testName": "检查错误处理机制",
+      "status": "PASS",
+      "details": "包含错误处理",
+      "timestamp": "2025-08-10T11:29:25.052Z"
+    },
+    {
+      "category": "VueComponents",
+      "testName": "Test.vue - selectAnswer",
+      "status": "PASS",
+      "details": "元素存在",
+      "timestamp": "2025-08-10T11:29:25.053Z"
+    },
+    {
+      "category": "VueComponents",
+      "testName": "Test.vue - nextQuestion",
+      "status": "PASS",
+      "details": "元素存在",
+      "timestamp": "2025-08-10T11:29:25.053Z"
+    },
+    {
+      "category": "VueComponents",
+      "testName": "Test.vue - recordAnswer",
+      "status": "PASS",
+      "details": "元素存在",
+      "timestamp": "2025-08-10T11:29:25.053Z"
+    },
+    {
+      "category": "VueComponents",
+      "testName": "Result.vue - proceedPayment",
+      "status": "PASS",
+      "details": "元素存在",
+      "timestamp": "2025-08-10T11:29:25.053Z"
+    },
+    {
+      "category": "VueComponents",
+      "testName": "Result.vue - dataService",
+      "status": "PASS",
+      "details": "元素存在",
+      "timestamp": "2025-08-10T11:29:25.054Z"
+    },
+    {
+      "category": "VueComponents",
+      "testName": "Result.vue - createPaymentOrder",
+      "status": "PASS",
+      "details": "元素存在",
+      "timestamp": "2025-08-10T11:29:25.054Z"
+    },
+    {
+      "category": "VueComponents",
+      "testName": "Report.vue - mbtiType",
+      "status": "PASS",
+      "details": "元素存在",
+      "timestamp": "2025-08-10T11:29:25.054Z"
+    },
+    {
+      "category": "VueComponents",
+      "testName": "Report.vue - dimensionScores",
+      "status": "PASS",
+      "details": "元素存在",
+      "timestamp": "2025-08-10T11:29:25.054Z"
+    },
+    {
+      "category": "VueComponents",
+      "testName": "Report.vue - proportions",
+      "status": "PASS",
+      "details": "元素存在",
+      "timestamp": "2025-08-10T11:29:25.054Z"
+    },
+    {
+      "category": "VueComponents",
+      "testName": "Home.vue - router",
+      "status": "PASS",
+      "details": "元素存在",
+      "timestamp": "2025-08-10T11:29:25.055Z"
+    },
+    {
+      "category": "VueComponents",
+      "testName": "Home.vue - startTest",
+      "status": "PASS",
+      "details": "元素存在",
+      "timestamp": "2025-08-10T11:29:25.055Z"
+    },
+    {
+      "category": "VueComponents",
+      "testName": "Home.vue - useRouter",
+      "status": "PASS",
+      "details": "元素存在",
+      "timestamp": "2025-08-10T11:29:25.055Z"
+    },
+    {
+      "category": "PiniaStores",
+      "testName": "assessment.ts - defineStore",
+      "status": "PASS",
+      "details": "特性存在",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "PiniaStores",
+      "testName": "assessment.ts - answers",
+      "status": "PASS",
+      "details": "特性存在",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "PiniaStores",
+      "testName": "assessment.ts - recordAnswer",
+      "status": "PASS",
+      "details": "特性存在",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "PiniaStores",
+      "testName": "enhancedAssessment.ts - dataService",
+      "status": "PASS",
+      "details": "特性存在",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "PiniaStores",
+      "testName": "enhancedAssessment.ts - batchSaveAnswers",
+      "status": "PASS",
+      "details": "特性存在",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "PiniaStores",
+      "testName": "enhancedAssessment.ts - sessionInfo",
+      "status": "PASS",
+      "details": "特性存在",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "Configuration",
+      "testName": "检查生产依赖: vue",
+      "status": "PASS",
+      "details": "版本: ^3.4.0",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "Configuration",
+      "testName": "检查生产依赖: pinia",
+      "status": "PASS",
+      "details": "版本: ^2.1.0",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "Configuration",
+      "testName": "检查生产依赖: vue-router",
+      "status": "PASS",
+      "details": "版本: ^4.2.0",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "Configuration",
+      "testName": "检查生产依赖: typescript",
+      "status": "PASS",
+      "details": "版本: ~5.3.0",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "Configuration",
+      "testName": "检查开发依赖: vite",
+      "status": "PASS",
+      "details": "版本: ^5.0.0",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "Configuration",
+      "testName": "检查开发依赖: @vitejs/plugin-vue",
+      "status": "PASS",
+      "details": "版本: ^4.5.0",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "Configuration",
+      "testName": "检查开发脚本",
+      "status": "PASS",
+      "details": "vite",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "Configuration",
+      "testName": "检查构建脚本",
+      "status": "PASS",
+      "details": "vue-tsc && vite build",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "Configuration",
+      "testName": "Vite Vue插件配置",
+      "status": "PASS",
+      "details": "插件已配置",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    },
+    {
+      "category": "Configuration",
+      "testName": "Vite配置结构",
+      "status": "PASS",
+      "details": "配置正确",
+      "timestamp": "2025-08-10T11:29:25.056Z"
+    }
+  ],
+  "timestamp": "2025-08-10T11:29:25.056Z"
+}

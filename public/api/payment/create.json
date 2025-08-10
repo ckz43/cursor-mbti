@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "message": "订单创建成功",
+  "orderId": "ORDER_20241201_001",
+  "paymentConfig": {
+    "appId": "wx1234567890abcdef",
+    "timeStamp": "1701234567",
+    "nonceStr": "abc123def456",
+    "package": "prepay_id=wx20241201123456789",
+    "signType": "MD5",
+    "paySign": "A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6"
+  }
+}

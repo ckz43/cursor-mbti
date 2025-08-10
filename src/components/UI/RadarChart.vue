@@ -15,6 +15,13 @@
         </polygon>
         <!-- 顶点小圆点 -->
         <circle v-for="(pt, i) in vertexPoints" :key="`pt-${i}`" :cx="pt.x" :cy="pt.y" r="3" class="fill-primary-500 stroke-white" stroke-width="1" />
+        <!-- 维度标签 -->
+        <text v-for="(pt, i) in vertexPoints" :key="`label-${i}`" 
+              :x="labelPositions[i].x" :y="labelPositions[i].y" 
+              text-anchor="middle" dominant-baseline="middle"
+              class="fill-gray-700 text-sm font-medium">
+          {{ dimensionLabels[i] }}
+        </text>
       </g>
 
       <!-- 渐变定义 -->
@@ -60,8 +67,18 @@ const secondary = computed(() => props.secondaryColor ?? '#8b5cf6')
 const valuesArr = computed(() => [props.values.NS, props.values.TF, props.values.JP, props.values.EI])
 // 顺序：NS(上) -> TF(右) -> JP(下) -> EI(左)，避免相邻维度交叉太多
 
+// 维度标签，对应valuesArr的顺序
+const dimensionLabels = ['感知性', '思考性', '判断性', '外向性']
+
 const vertexPoints = computed(() => valuesArr.value.map((v, i) => {
   const r = norm(v)
+  const angle = angles[i]
+  return { x: Math.cos(angle) * r, y: Math.sin(angle) * r }
+}))
+
+// 标签位置（在顶点外侧一点距离）
+const labelPositions = computed(() => valuesArr.value.map((v, i) => {
+  const r = norm(v) + 20 // 在数据点外侧20px
   const angle = angles[i]
   return { x: Math.cos(angle) * r, y: Math.sin(angle) * r }
 }))

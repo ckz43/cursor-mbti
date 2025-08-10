@@ -19,9 +19,7 @@
             </div>
           </div>
           
-          <button class="btn-secondary">
-            分享结果
-          </button>
+          
         </div>
       </nav>
     </header>
@@ -29,16 +27,7 @@
     <!-- 结果内容区域 -->
     <main class="container py-12">
       <div class="max-w-4xl mx-auto">
-        <!-- 维度可视化 -->
-        <div class="grid sm:grid-cols-4 gap-4 mb-6">
-          <div v-for="(value, key) in proportions" :key="key" class="bg-white rounded-2xl p-4 shadow-soft">
-            <div class="text-sm text-gray-500 mb-2">{{ dimensionLabels[key] }}</div>
-            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full" :style="{ width: value + '%' }"></div>
-            </div>
-            <div class="mt-2 text-xs text-gray-600">{{ value }}%</div>
-          </div>
-        </div>
+
         <!-- 结果展示卡片 -->
         <div class="bg-white rounded-3xl shadow-soft overflow-hidden mb-8">
           <!-- 头部背景 -->
@@ -51,47 +40,11 @@
             <p class="text-lg text-white/80">{{ result.subtitle }}</p>
           </div>
 
-          <!-- 基础描述 -->
-          <div class="p-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">你的性格特点</h2>
-            <p class="text-gray-600 leading-relaxed text-lg mb-6">{{ result.description }}</p>
-            
-            <!-- 核心特质 -->
-            <div class="grid sm:grid-cols-2 gap-4 mb-8">
-              <div class="bg-green-50 p-4 rounded-xl">
-                <h3 class="font-semibold text-green-800 mb-2">核心优势</h3>
-                <ul class="space-y-1">
-                  <li v-for="strength in result.coreStrengths" :key="strength" class="text-green-700 text-sm flex items-center gap-2">
-                    <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                    {{ strength }}
-                  </li>
-                </ul>
-              </div>
-              <div class="bg-blue-50 p-4 rounded-xl">
-                <h3 class="font-semibold text-blue-800 mb-2">典型特征</h3>
-                <ul class="space-y-1">
-                  <li v-for="trait in result.traits" :key="trait" class="text-blue-700 text-sm flex items-center gap-2">
-                    <div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                    {{ trait }}
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+
         </div>
 
         <!-- 详细分析板块预览 -->
-        <div class="grid lg:grid-cols-2 gap-6 mb-8">
-          <div class="bg-white rounded-2xl shadow-soft p-6 flex flex-col items-center justify-center">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">维度雷达图</h3>
-            <RadarChart :values="proportions" :size="280" />
-            <div class="grid grid-cols-2 gap-2 mt-4 w-full text-xs text-gray-500">
-              <div v-for="(label, key) in dimensionLabels" :key="key" class="flex items-center justify-between">
-                <span>{{ label }}</span>
-                <span class="text-gray-700">{{ proportions[key] }}%</span>
-              </div>
-            </div>
-          </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div 
             v-for="section in sections"
             :key="section.id"
@@ -105,8 +58,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                   </svg>
                 </div>
-                <h4 class="font-semibold text-gray-900 mb-2">解锁完整内容</h4>
-                <p class="text-sm text-gray-600">获取详细的性格分析报告</p>
+                <h4 class="font-semibold text-gray-900 mb-2">{{ section.title }}</h4>
+                <p class="text-sm text-gray-600">解锁查看详细内容</p>
               </div>
             </div>
             
@@ -135,27 +88,38 @@
           
           <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
             <div class="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
-              <div class="text-2xl font-bold">¥19.9</div>
-              <div class="text-sm text-white/80">限时优惠价</div>
-              <div class="text-xs text-white/60 line-through">原价 ¥39.9</div>
+              <div class="text-2xl font-bold">¥39.9</div>
+              <div class="text-sm text-white/80">专业版报告</div>
             </div>
             <div class="text-left">
               <div class="font-semibold mb-1">包含内容：</div>
               <div class="text-sm text-white/90 space-y-1">
                 <div>✓ 6大专业分析板块</div>
                 <div>✓ 个性化成长建议</div>
-                <div>✓ 终身查看权限</div>
+                <div>✓ 永久查看权限</div>
               </div>
             </div>
           </div>
 
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <button class="bg-white text-primary-600 font-semibold px-8 py-3 rounded-xl hover:bg-gray-50 transition-colors btn-animate btn-shine shine-loop cta-attention">
-              立即解锁 ¥19.9
+            <button @click="unlock" :disabled="isPaymentLoading" class="bg-white text-primary-600 font-semibold px-8 py-3 rounded-xl hover:bg-gray-50 transition-colors btn-animate btn-shine shine-loop cta-attention disabled:opacity-50 disabled:cursor-not-allowed">
+              <span v-if="isPaymentLoading" class="flex items-center justify-center gap-2">
+                <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                处理中...
+              </span>
+              <span v-else>立即解锁 ¥39.9</span>
             </button>
             <button class="border-2 border-white/30 text-white font-semibold px-8 py-3 rounded-xl hover:bg-white/10 transition-colors btn-animate">
               分享给朋友
             </button>
+          </div>
+
+          <!-- 支付消息提示 -->
+          <div v-if="paymentMessage" class="mt-6 p-3 rounded-lg text-center" :class="paymentMessage.includes('成功') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+            {{ paymentMessage }}
           </div>
 
         </div>
@@ -200,7 +164,7 @@
           </svg>
           <span class="hidden sm:inline">解锁完整报告</span>
           <span class="sm:hidden">解锁</span>
-          <span class="ml-1 opacity-90 text-white/90">¥19.9</span>
+          <span class="ml-1 opacity-90 text-white/90">¥39.9</span>
         </span>
       </button>
     </div>
@@ -210,30 +174,294 @@
       <div class="container py-3 flex items-center justify-between gap-3">
         <div>
           <div class="text-sm text-gray-700 font-semibold leading-tight">解锁完整报告</div>
-          <div class="text-xs text-gray-500 leading-tight">限时价 <span class="font-bold text-primary-600">¥19.9</span> · 含6大板块</div>
+          <div class="text-xs text-gray-500 leading-tight">专业版 <span class="font-bold text-primary-600">¥39.9</span> · 含6大板块</div>
         </div>
         <button 
-          class="bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold px-5 py-2 rounded-full shadow-xl hover:shadow-2xl btn-animate btn-shine shine-loop cta-attention"
+          class="bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold px-5 py-2 rounded-full shadow-xl hover:shadow-2xl btn-animate btn-shine shine-loop cta-attention disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="立即解锁"
           @click="unlock"
+          :disabled="isPaymentLoading"
         >
-          立即解锁
+          <span v-if="isPaymentLoading" class="flex items-center justify-center gap-2">
+            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            处理中...
+          </span>
+          <span v-else>立即解锁</span>
         </button>
+      </div>
+    </div>
+
+    <!-- 初始付费弹窗 -->
+    <div v-if="showPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div class="bg-white rounded-3xl max-w-md w-full mx-4 overflow-hidden animate-scale-in">
+        <!-- 弹窗头部 -->
+        <div class="bg-gradient-to-r from-primary-500 to-secondary-500 text-white p-6 text-center relative">
+          <button @click="closePaymentModal" class="absolute top-4 right-4 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+          
+          <!-- 权威标识 -->
+          <div class="flex items-center justify-center gap-2 mb-3">
+            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="text-xs text-white/90">
+              <div class="font-semibold">权威认证</div>
+              <div>心理学专业团队</div>
+            </div>
+          </div>
+          
+          <h3 class="text-2xl font-bold mb-1">解锁完整性格报告</h3>
+          <p class="text-white/90 text-sm mb-2">🔥 限时特价，仅需一杯咖啡钱</p>
+          <p class="text-white/80 text-xs">基于荣格心理学的专业解读</p>
+        </div>
+        
+        <!-- 弹窗内容 -->
+        <div class="p-6">
+          <!-- 价格展示 -->
+          <div class="bg-gradient-to-r from-primary-50 to-secondary-50 rounded-xl p-4 mb-4">
+            <div class="flex items-center justify-center gap-2 mb-1">
+              <span class="text-lg text-gray-400 line-through">¥99</span>
+              <span class="text-3xl font-bold text-primary-600">¥39.9</span>
+              <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">6折</span>
+            </div>
+            <p class="text-sm text-primary-700 font-semibold text-center">专业版完整报告 · 超值价格</p>
+          </div>
+          
+          <!-- 核心价值点 -->
+          <div class="space-y-2 mb-4">
+            <div class="flex items-center text-sm text-gray-700 bg-green-50 p-3 rounded-lg">
+              <svg class="w-4 h-4 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="font-semibold">6大专业维度深度解析</span>
+            </div>
+            <div class="flex items-center text-sm text-gray-700 bg-blue-50 p-3 rounded-lg">
+              <svg class="w-4 h-4 text-blue-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="font-semibold">个性化职业发展建议</span>
+            </div>
+            <div class="flex items-center text-sm text-gray-700 bg-purple-50 p-3 rounded-lg">
+              <svg class="w-4 h-4 text-purple-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="font-semibold">永久查看权限</span>
+            </div>
+          </div>
+          
+          <!-- 社会证明 -->
+          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+            <div class="flex items-center justify-center gap-1 mb-1">
+              <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+              </svg>
+              <span class="text-sm font-bold text-yellow-700">4.9分好评</span>
+            </div>
+            <p class="text-xs text-yellow-700 text-center">已有18,642人获得专业报告</p>
+          </div>
+          
+          <!-- 紧迫感提示 -->
+          <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+            <div class="flex items-center justify-center gap-1 mb-1">
+              <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-sm font-bold text-red-700 animate-pulse">⚡ 限时优惠还剩：<span class="text-red-800 font-mono">{{ formatTime(countdown) }}</span></span>
+            </div>
+            <p class="text-xs text-red-600 text-center">此价格今日有效，明日恢复原价¥99</p>
+          </div>
+          
+          <button @click="proceedPayment(39.9)" :disabled="isPaymentLoading" class="w-full bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-bold py-4 px-6 rounded-xl text-lg hover:shadow-lg transition-all disabled:opacity-50 shadow-xl animate-pulse">
+            🚀 立即解锁专业报告
+          </button>
+          
+          <!-- 信任背书 -->
+          <div class="mt-4 flex items-center justify-center gap-4 text-xs text-gray-500">
+            <div class="flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>微信安全支付</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>专业团队认证</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第一次优惠弹窗 (29.9) -->
+    <div v-if="showDiscountModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div class="bg-white rounded-3xl max-w-md w-full mx-4 overflow-hidden animate-scale-in">
+        <!-- 弹窗头部 -->
+        <div class="bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 text-center relative">
+          <button @click="closeDiscountModal" class="absolute top-4 right-4 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+          <div class="w-20 h-20 bg-white/15 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold mb-2">特享优惠</h3>
+          <p class="text-white/90">限时新人优惠价</p>
+        </div>
+        
+        <!-- 弹窗内容 -->
+        <div class="p-6">
+          <div class="text-center mb-6">
+            <div class="flex items-center justify-center gap-2 mb-2">
+              <span class="text-lg text-gray-400 line-through">¥39.9</span>
+              <span class="text-3xl font-bold text-orange-600">¥29.9</span>
+            </div>
+            <div class="text-orange-600 font-semibold">新人专享优惠券</div>
+            <div class="text-sm text-gray-600">节省 ¥10</div>
+          </div>
+          
+          <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
+            <div class="flex items-center gap-2 mb-2">
+              <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="font-semibold text-orange-800">限时优惠</span>
+            </div>
+            <p class="text-sm text-orange-700">此优惠仅限新用户，错过不再有！</p>
+          </div>
+          
+          <button @click="proceedPayment(29.9)" :disabled="isPaymentLoading" class="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold py-4 px-6 rounded-xl text-lg hover:shadow-lg transition-all disabled:opacity-50 shadow-xl">
+            立即领取优惠
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 最终优惠弹窗 (19.9) -->
+    <div v-if="showFinalDiscountModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div class="bg-white rounded-3xl max-w-md w-full mx-4 overflow-hidden animate-scale-in">
+        <!-- 弹窗头部 -->
+        <div class="bg-gradient-to-r from-pink-500 to-purple-600 text-white p-6 text-center relative">
+          <button @click="closeFinalDiscountModal" class="absolute top-4 right-4 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+          <div class="w-20 h-20 bg-white/15 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold mb-2">最终优惠</h3>
+          <p class="text-white/90">错过今天就没有了！</p>
+        </div>
+        
+        <!-- 弹窗内容 -->
+        <div class="p-6">
+          <div class="text-center mb-6">
+            <div class="flex items-center justify-center gap-2 mb-2">
+              <span class="text-lg text-gray-400 line-through">¥39.9</span>
+              <span class="text-4xl font-bold text-pink-600">¥19.9</span>
+            </div>
+            <div class="text-pink-600 font-bold text-lg">超级VIP专享价</div>
+            <div class="text-sm text-gray-600">节省 ¥20，史上最低价</div>
+          </div>
+          
+          <!-- 增值权益展示 -->
+          <div class="space-y-3 mb-6">
+            <div class="bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-xl p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="font-bold text-pink-800">专业心理学报告</span>
+              </div>
+              <p class="text-sm text-pink-700">基于荣格理论的6大维度深度分析</p>
+            </div>
+            
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+                <span class="font-bold text-purple-800">个人成长指南</span>
+              </div>
+              <p class="text-sm text-purple-700">定制化职业发展与关系建议</p>
+            </div>
+            
+
+          </div>
+          
+          <!-- 紧迫感提示 -->
+          <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+            <div class="flex items-center gap-2 mb-2">
+              <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="font-bold text-red-800 animate-pulse">⚡ 限时优惠还剩：<span class="text-red-900 font-mono text-lg">{{ formatTime(finalCountdown) }}</span></span>
+            </div>
+            <p class="text-sm text-red-700">此价格仅限今日，明天恢复原价¥99.9</p>
+            <p class="text-xs text-red-600 mt-1">已有2847人抢购成功</p>
+          </div>
+          
+          <button @click="proceedPayment(19.9)" :disabled="isPaymentLoading" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-4 px-6 rounded-xl text-lg hover:shadow-lg transition-all disabled:opacity-50 shadow-xl animate-pulse">
+            立即抢购 ¥19.9 (限时)
+          </button>
+          
+          <!-- 信任背书 -->
+          <div class="mt-4 text-center">
+            <div class="flex items-center justify-center gap-4 text-xs text-gray-500">
+              <div class="flex items-center gap-1">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>安全支付</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>终身有效</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>专业权威</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAssessmentStore } from '@/stores/assessment'
+import { useEnhancedAssessmentStore } from '@/stores/enhancedAssessment'
 import { typeProfiles } from '@/data/profiles'
-import RadarChart from '@/components/UI/RadarChart.vue'
+import { handlePayment, isWechatBrowser } from '@/utils/payment'
+import { dataService } from '@/services/dataService'
 
 const router = useRouter()
 
 const store = useAssessmentStore()
+const assessmentStore = useEnhancedAssessmentStore()
 
 const mbtiType = computed(() => store.mbtiType)
 const profile = computed(() => typeProfiles[mbtiType.value] || typeProfiles['ENFP'])
@@ -249,32 +477,39 @@ const result = computed(() => ({
 
 const sections = computed(() => [
   {
+    id: 'jung',
+    title: '荣格八维分析',
+    icon: '🔧',
+    preview: '深度解析你的认知功能堆栈',
+    highlights: ['主导功能优势分析', '辅助功能发展建议', '盲点功能改善方案']
+  },
+  {
+    id: 'shadow',
+    title: '隐藏人格',
+    icon: '🌑',
+    preview: '探索压力下的影子面表现',
+    highlights: ['影子人格触发条件', '压力状态识别信号', '恢复策略与应对方法']
+  },
+  {
+    id: 'personality',
+    title: '人格特征分析',
+    icon: '🧠',
+    preview: '全面解读你的核心特质',
+    highlights: ['性格优势与天赋', '典型行为模式', '个性化成长建议']
+  },
+  {
     id: 'career',
-    title: profile.value.career.title,
-    icon: profile.value.career.icon,
-    preview: profile.value.career.subtitle || '职业发展',
-    highlights: [...profile.value.career.strengths.slice(0, 3)]
+    title: '职业发展建议',
+    icon: '💼',
+    preview: '匹配你性格的职业路径',
+    highlights: ['适合的工作环境', '职业发展方向', '团队协作优势']
   },
   {
     id: 'relationship',
-    title: profile.value.relationship.title,
-    icon: profile.value.relationship.icon,
-    preview: profile.value.relationship.subtitle || '恋爱关系',
-    highlights: [...profile.value.relationship.strengths.slice(0, 3)]
-  },
-  {
-    id: 'social',
-    title: profile.value.social.title,
-    icon: profile.value.social.icon,
-    preview: profile.value.social.subtitle || '人际交往',
-    highlights: [...profile.value.social.strengths.slice(0, 3)]
-  },
-  {
-    id: 'growth',
-    title: '个人成长路径',
-    icon: '🌱',
-    preview: '识别性格盲点，制定成长计划',
-    highlights: profile.value.growth.slice(0, 3)
+    title: '恋爱关系分析',
+    icon: '💕',
+    preview: '了解你在亲密关系中的表现',
+    highlights: ['恋爱风格特点', '关系中的优势', '需要注意的盲点']
   }
 ])
 
@@ -289,23 +524,201 @@ const onCharacterImgError = (e: Event) => {
   target.src = '/images/avatar-placeholder.svg'
 }
 
+// 支付状态
+const isPaymentLoading = ref(false)
+const paymentMessage = ref('')
+
+// 弹窗状态管理
+const showPaymentModal = ref(false)
+const showDiscountModal = ref(false)
+const showFinalDiscountModal = ref(false)
+const currentPrice = ref(39.9)
+const modalStep = ref(0) // 0: 初始, 1: 第一次优惠, 2: 最终优惠
+
+// 倒计时功能
+const countdown = ref(300000) // 5分钟倒计时（毫秒）
+const finalCountdown = ref(300000) // 最终弹窗5分钟倒计时（毫秒）
+let countdownTimer: NodeJS.Timeout | null = null
+let finalCountdownTimer: NodeJS.Timeout | null = null
+
 // 解锁按钮点击
 const unlock = () => {
-  // TODO: 接入支付逻辑
-  console.log('unlock clicked')
+  showPaymentModal.value = true
+  modalStep.value = 0
+  currentPrice.value = 39.9
 }
 
-// 维度可视化（容错+解构）
-const proportions = computed(() => {
-  const p = (store as any)?.proportions
-  if (!p) return { EI: 0, NS: 0, TF: 0, JP: 0 }
-  const { EI = 0, NS = 0, TF = 0, JP = 0 } = p as any
-  return { EI, NS, TF, JP }
-})
-const dimensionLabels: Record<'EI'|'NS'|'TF'|'JP', string> = {
-  EI: '外向(E) - 内向(I)',
-  NS: '直觉(N) - 实感(S)',
-  TF: '思考(T) - 情感(F)',
-  JP: '判断(J) - 知觉(P)'
+// 关闭初始付费弹窗
+const closePaymentModal = () => {
+  showPaymentModal.value = false
+  // 第一次关闭，显示29.9优惠弹窗
+  if (modalStep.value === 0) {
+    setTimeout(() => {
+      showDiscountModal.value = true
+      currentPrice.value = 29.9
+      modalStep.value = 1
+    }, 300)
+  }
 }
+
+// 关闭第一次优惠弹窗
+const closeDiscountModal = () => {
+  showDiscountModal.value = false
+  // 第二次关闭，显示19.9最终优惠弹窗
+  if (modalStep.value === 1) {
+    setTimeout(() => {
+      showFinalDiscountModal.value = true
+      currentPrice.value = 19.9
+      modalStep.value = 2
+    }, 300)
+  }
+}
+
+// 关闭最终优惠弹窗
+const closeFinalDiscountModal = () => {
+  showFinalDiscountModal.value = false
+  // 用户最终选择不付费，正常显示结果页
+}
+
+// 执行支付
+const proceedPayment = async (price: number) => {
+  if (isPaymentLoading.value) return
+  
+  // 检查微信环境
+  if (!isWechatBrowser()) {
+    paymentMessage.value = '请在微信中打开此页面进行支付'
+    setTimeout(() => paymentMessage.value = '', 3000)
+    return
+  }
+  
+  isPaymentLoading.value = true
+  paymentMessage.value = '正在创建订单...'
+  
+  // 关闭所有弹窗
+  showPaymentModal.value = false
+  showDiscountModal.value = false
+  showFinalDiscountModal.value = false
+  
+  try {
+    // 创建支付订单数据（模拟数据）
+    const orderData = {
+      user_id: assessmentStore.userId || 'user_' + Date.now(),
+      session_id: assessmentStore.sessionId,
+      product_type: 'premium_report' as const,
+      amount: price,
+      currency: 'CNY',
+      status: 'pending' as const,
+      payment_method: 'wechat'
+    }
+    
+    // 保存订单到数据服务
+    const order = await dataService.createPaymentOrder(orderData)
+    console.log('订单创建成功:', order)
+    
+    // 记录用户行为
+    await dataService.logUserBehavior({
+      user_id: assessmentStore.userId || 'user_' + Date.now(),
+      session_id: assessmentStore.sessionId,
+      action: 'payment_initiated',
+      page: 'result',
+      details: { price, product: 'MBTI性格测试完整报告', orderId: order.id }
+    })
+    
+    const result = await handlePayment(price, 'MBTI性格测试完整报告')
+    
+    if (result.success) {
+      // 更新订单状态为已支付
+      await dataService.updatePaymentOrder(order.id, {
+        status: 'paid',
+        payment_id: 'mock_payment_' + Date.now()
+      })
+      
+      // 记录支付成功行为
+      await dataService.logUserBehavior({
+        user_id: assessmentStore.userId || 'user_' + Date.now(),
+        session_id: assessmentStore.sessionId,
+        action: 'payment_success',
+        page: 'result',
+        details: { orderId: order.id, amount: price }
+      })
+      
+      // 设置付费状态
+      assessmentStore.setPaid(true)
+      
+      paymentMessage.value = '支付成功！正在跳转...'
+      // 支付成功后跳转到报告页
+      setTimeout(() => {
+        router.push('/report')
+      }, 1500)
+    } else {
+      // 更新订单状态为失败
+      await dataService.updatePaymentOrder(order.id, {
+        status: 'failed'
+      })
+      
+      // 记录支付失败行为
+      await dataService.logUserBehavior({
+        user_id: assessmentStore.userId || 'user_' + Date.now(),
+        session_id: assessmentStore.sessionId,
+        action: 'payment_failed',
+        page: 'result',
+        details: { orderId: order.id, error: result.message }
+      })
+      
+      paymentMessage.value = result.message
+      setTimeout(() => paymentMessage.value = '', 3000)
+    }
+  } catch (error) {
+    console.error('支付失败:', error)
+    
+    // 记录支付错误行为
+    await dataService.logUserBehavior({
+      user_id: assessmentStore.userId || 'user_' + Date.now(),
+      session_id: assessmentStore.sessionId,
+      action: 'payment_error',
+      page: 'result',
+      details: { error: error.message }
+    })
+    
+    paymentMessage.value = '支付失败，请重试'
+    setTimeout(() => paymentMessage.value = '', 3000)
+  } finally {
+    isPaymentLoading.value = false
+  }
+}
+
+// 启动倒计时
+const startCountdown = () => {
+  countdownTimer = setInterval(() => {
+    if (countdown.value > 0) {
+      countdown.value -= 10 // 每10毫秒减少
+    } else {
+      if (countdownTimer) clearInterval(countdownTimer)
+    }
+  }, 10)
+}
+
+const startFinalCountdown = () => {
+  finalCountdownTimer = setInterval(() => {
+    if (finalCountdown.value > 0) {
+      finalCountdown.value -= 10 // 每10毫秒减少
+    } else {
+      if (finalCountdownTimer) clearInterval(finalCountdownTimer)
+    }
+  }, 10)
+}
+
+// 格式化时间显示（毫秒级别）
+const formatTime = (milliseconds: number) => {
+  const totalSeconds = Math.floor(milliseconds / 1000)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  const ms = Math.floor((milliseconds % 1000) / 10) // 显示两位毫秒
+  return `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`
+}
+
+// 组件挂载时启动倒计时
+startCountdown()
+startFinalCountdown()
+
 </script>

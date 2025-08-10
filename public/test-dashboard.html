@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI测试系统 - 测试控制台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .test-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .test-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #4facfe;
+        }
+        
+        .test-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .test-card p {
+            color: #6c757d;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .test-card .features {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        
+        .test-card .features li {
+            color: #495057;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .test-card .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+        }
+        
+        .quick-actions {
+            background: #e3f2fd;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .quick-actions h3 {
+            color: #1976d2;
+            margin-bottom: 20px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .status.ready {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.running {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.completed {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 MBTI测试系统</h1>
+            <p>测试控制台 - 全方位测试工具集</p>
+        </div>
+        
+        <div class="content">
+            <div class="test-grid">
+                <div class="test-card">
+                    <h3>🔍 代码结构测试</h3>
+                    <p>检查项目文件结构、依赖关系和代码完整性</p>
+                    <ul class="features">
+                        <li>文件存在性检查</li>
+                        <li>依赖关系验证</li>
+                        <li>代码结构分析</li>
+                        <li>配置文件检查</li>
+                    </ul>
+                    <button class="btn" onclick="runStructureTest()">运行结构测试</button>
+                    <span class="status ready" id="structure-status">就绪</span>
+                </div>
+                
+                <div class="test-card">
+                    <h3>🌐 浏览器功能测试</h3>
+                    <p>在浏览器环境中测试用户界面和交互功能</p>
+                    <ul class="features">
+                        <li>UI组件检查</li>
+                        <li>用户交互模拟</li>
+                        <li>响应式设计测试</li>
+                        <li>性能监控</li>
+                    </ul>
+                    <button class="btn btn-secondary" onclick="loadBrowserTest()">加载浏览器测试</button>
+                    <span class="status ready" id="browser-status">就绪</span>
+                </div>
+                
+                <div class="test-card">
+                    <h3>🤖 自动化集成测试</h3>
+                    <p>使用Puppeteer进行端到端自动化测试</p>
+                    <ul class="features">
+                        <li>多页面自动测试</li>
+                        <li>用户流程模拟</li>
+                        <li>截图对比</li>
+                        <li>性能分析</li>
+                    </ul>
+                    <button class="btn btn-success" onclick="runAutomatedTest()">运行自动化测试</button>
+                    <span class="status ready" id="automated-status">就绪</span>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <h3>🚀 快速操作</h3>
+                <div class="action-buttons">
+                    <button class="btn" onclick="openMainApp()">打开主应用</button>
+                    <button class="btn btn-secondary" onclick="openDevTools()">开发者工具指南</button>
+                    <button class="btn btn-success" onclick="runAllTests()">运行所有测试</button>
+                    <button class="btn" onclick="clearConsole()">清空控制台</button>
+                    <button class="btn btn-secondary" onclick="downloadReports()">下载测试报告</button>
+                </div>
+            </div>
+            
+            <div class="console-output" id="console-output">
+                <div>📋 测试控制台输出:</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let testResults = {};
+        
+        function log(message, type = 'info') {
+            const console_output = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            console_output.innerHTML += `<div>[${timestamp}] ${icon} ${message}</div>`;
+            console_output.scrollTop = console_output.scrollHeight;
+            console_output.style.display = 'block';
+            
+            // 同时输出到浏览器控制台
+            console.log(`[测试控制台] ${message}`);
+        }
+        
+        function updateStatus(testType, status) {
+            const statusElement = document.getElementById(`${testType}-status`);
+            statusElement.className = `status ${status}`;
+            statusElement.textContent = {
+                'ready': '就绪',
+                'running': '运行中',
+                'completed': '已完成',
+                'error': '错误'
+            }[status] || status;
+        }
+        
+        async function runStructureTest() {
+            log('开始运行代码结构测试...');
+            updateStatus('structure', 'running');
+            
+            try {
+                // 检查是否在开发环境
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    log('检测到开发环境，尝试运行结构测试');
+                    
+                    // 这里可以通过API调用后端测试脚本
+                    // 或者提示用户在终端运行
+                    log('请在终端运行: npm run test 或 node execute-tests.js');
+                    log('结构测试需要在Node.js环境中运行');
+                    
+                    updateStatus('structure', 'completed');
+                    testResults.structure = { status: 'manual', message: '需要手动在终端运行' };
+                } else {
+                    log('生产环境不支持结构测试', 'warning');
+                    updateStatus('structure', 'error');
+                }
+            } catch (error) {
+                log(`结构测试失败: ${error.message}`, 'error');
+                updateStatus('structure', 'error');
+            }
+        }
+        
+        async function loadBrowserTest() {
+            log('加载浏览器测试脚本...');
+            updateStatus('browser', 'running');
+            
+            try {
+                // 加载浏览器测试脚本
+                const script = document.createElement('script');
+                script.src = '/browser-test-runner.js';
+                script.onload = () => {
+                    log('浏览器测试脚本加载成功', 'success');
+                    log('使用 runner.runTestOnCurrentPage() 开始测试');
+                    log('或使用 runner.showQuickStart() 查看使用说明');
+                    updateStatus('browser', 'completed');
+                    testResults.browser = { status: 'loaded', message: '脚本已加载，可在控制台使用' };
+                };
+                script.onerror = () => {
+                    throw new Error('无法加载浏览器测试脚本');
+                };
+                document.head.appendChild(script);
+                
+            } catch (error) {
+                log(`浏览器测试加载失败: ${error.message}`, 'error');
+                updateStatus('browser', 'error');
+            }
+        }
+        
+        async function runAutomatedTest() {
+            log('准备运行自动化测试...');
+            updateStatus('automated', 'running');
+            
+            try {
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    log('请在终端运行: npm run test:auto');
+                    log('自动化测试需要Puppeteer环境支持');
+                    log('确保已安装依赖: npm install puppeteer');
+                    
+                    updateStatus('automated', 'completed');
+                    testResults.automated = { status: 'manual', message: '需要手动在终端运行' };
+                } else {
+                    log('生产环境不支持自动化测试', 'warning');
+                    updateStatus('automated', 'error');
+                }
+            } catch (error) {
+                log(`自动化测试失败: ${error.message}`, 'error');
+                updateStatus('automated', 'error');
+            }
+        }
+        
+        function openMainApp() {
+            log('打开主应用...');
+            window.open('/', '_blank');
+        }
+        
+        function openDevTools() {
+            log('显示开发者工具使用指南');
+            const guide = `
+🛠️ 开发者工具使用指南:
+
+1. 打开开发者工具: F12 或 Ctrl+Shift+I (Windows) / Cmd+Option+I (Mac)
+2. 切换到 Console 标签页
+3. 运行测试命令:
+   - runner.runTestOnCurrentPage() // 测试当前页面
+   - runner.simulateUserInteraction() // 模拟用户交互
+   - runner.checkPageSpecificFeatures() // 检查页面功能
+   - runner.generateFinalReport() // 生成测试报告
+
+💡 提示: 可以在不同页面运行测试，然后生成综合报告
+            `;
+            
+            alert(guide);
+            log('开发者工具使用指南已显示');
+        }
+        
+        async function runAllTests() {
+            log('开始运行所有测试...', 'success');
+            
+            await runStructureTest();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await loadBrowserTest();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await runAutomatedTest();
+            
+            log('所有测试任务已启动', 'success');
+            log('请查看各个测试的状态和说明');
+        }
+        
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = '<div>📋 测试控制台输出:</div>';
+            console.clear();
+            log('控制台已清空');
+        }
+        
+        function downloadReports() {
+            log('准备下载测试报告...');
+            
+            try {
+                // 从localStorage获取测试报告
+                const reports = {
+                    browserTest: localStorage.getItem('mbti_test_report'),
+                    testResults: testResults,
+                    timestamp: new Date().toISOString()
+                };
+                
+                const dataStr = JSON.stringify(reports, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `mbti-test-reports-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                
+                log('测试报告下载完成', 'success');
+            } catch (error) {
+                log(`下载报告失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            log('MBTI测试系统控制台已加载', 'success');
+            log('选择上方的测试类型开始测试');
+            
+            // 检查当前环境
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            if (isLocal) {
+                log('检测到开发环境，所有测试功能可用');
+            } else {
+                log('检测到生产环境，部分测试功能受限', 'warning');
+            }
+        });
+    </script>
+</body>
+</html>

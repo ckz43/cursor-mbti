@@ -45,6 +45,67 @@
           </div>
         </div>
 
+        <!-- 维度可视化 -->
+        <div class="bg-white rounded-2xl shadow-soft p-6">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">MBTI维度分析</h2>
+          <div class="grid sm:grid-cols-4 gap-4 mb-6">
+            <div v-for="(value, key) in proportions" :key="key" class="bg-gray-50 rounded-xl p-4">
+              <div class="text-sm text-gray-500 mb-2">{{ dimensionLabels[key] }}</div>
+              <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full transition-all duration-500" :style="{ width: value + '%' }"></div>
+              </div>
+              <div class="mt-2 text-sm font-semibold text-gray-700">{{ value }}%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 雷达图分析 -->
+        <div class="bg-white rounded-2xl shadow-soft p-6">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">维度雷达图</h2>
+          <div class="flex flex-col items-center">
+            <RadarChart :values="proportions" :size="320" />
+            <div class="grid grid-cols-2 gap-4 mt-6 w-full max-w-md text-sm">
+              <div v-for="(label, key) in dimensionLabels" :key="key" class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                <span class="text-gray-600">{{ label }}</span>
+                <span class="font-semibold text-gray-800">{{ proportions[key] }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 核心特质分析 -->
+        <div class="bg-white rounded-2xl shadow-soft p-6">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">你的性格特点</h2>
+          <p class="text-gray-600 leading-relaxed text-lg mb-6">{{ result.description }}</p>
+          
+          <div class="grid sm:grid-cols-2 gap-6">
+            <div class="bg-green-50 p-6 rounded-xl">
+              <h3 class="font-semibold text-green-800 mb-4 flex items-center gap-2">
+                <span class="text-xl">✨</span>
+                核心优势
+              </h3>
+              <ul class="space-y-3">
+                <li v-for="strength in result.coreStrengths" :key="strength" class="text-green-700 flex items-start gap-3">
+                  <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <span>{{ strength }}</span>
+                </li>
+              </ul>
+            </div>
+            <div class="bg-blue-50 p-6 rounded-xl">
+              <h3 class="font-semibold text-blue-800 mb-4 flex items-center gap-2">
+                <span class="text-xl">🎯</span>
+                典型特征
+              </h3>
+              <ul class="space-y-3">
+                <li v-for="trait in result.traits" :key="trait" class="text-blue-700 flex items-start gap-3">
+                  <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <span>{{ trait }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <!-- 报告章节（动态渲染） -->
         <div 
           v-for="section in dynamicSections" 
@@ -159,12 +220,35 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { typeProfiles } from '@/data/profiles'
 import { useAssessmentStore } from '@/stores/assessment'
+import RadarChart from '@/components/UI/RadarChart.vue'
 
 const router = useRouter()
 
 const store = useAssessmentStore()
 const currentType = computed(() => store.finished ? store.mbtiType : 'ENFP')
 const profile = computed(() => typeProfiles[currentType.value] || typeProfiles['ENFP'])
+
+// 计算维度百分比
+const proportions = computed(() => {
+  return store.proportions
+})
+
+// 维度分数（与proportions相同，但提供不同的访问方式）
+const dimensionScores = computed(() => {
+  return store.proportions
+})
+
+// 维度标签
+const dimensionLabels = {
+  EI: '外向性 (E)',
+  NS: '感知性 (S)', 
+  TF: '思考性 (T)',
+  JP: '判断性 (J)'
+}
+
+
+
+
 // 构造长文的通用兜底：将摘要+要点自动扩写为连贯段落（避免出现空白/过短）
 const toSentence = (text?: string) => (text ? (text.endsWith('。') || text.endsWith('！') || text.endsWith('？') ? text : text + '。') : '')
 const joinSentences = (parts: (string | undefined)[]) => parts.map(toSentence).join('')
@@ -210,7 +294,10 @@ const expanded = computed(() => {
 const result = computed(() => ({
   type: profile.value.type,
   name: profile.value.name,
-  subtitle: profile.value.subtitle
+  subtitle: profile.value.subtitle,
+  description: profile.value.description,
+  coreStrengths: profile.value.coreStrengths || [],
+  traits: profile.value.traits || []
 }))
 
 // 人格图像 + 兜底
