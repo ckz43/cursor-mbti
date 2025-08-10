@@ -263,6 +263,7 @@ interface PersonalityType {
   type: string
   name: string
   emoji: string
+  image?: string
   traits: string[]
   stats: { name: string; value: number }[]
   description: string

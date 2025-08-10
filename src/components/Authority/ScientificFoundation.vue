@@ -179,7 +179,7 @@
             
             <div class="space-y-8">
               <div 
-                v-for="(milestone, index) in theoryMilestones"
+                v-for="milestone in theoryMilestones"
                 :key="milestone.year"
                 class="relative"
               >

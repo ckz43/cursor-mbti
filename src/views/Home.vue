@@ -302,7 +302,6 @@
 import { useRouter } from 'vue-router'
 import ScientificFoundation from '@/components/Authority/ScientificFoundation.vue'
 import FoundersSection from '@/components/Authority/FoundersSection.vue'
-import MBTICharacters from '@/components/Characters/MBTICharacters.vue'
 
 const router = useRouter()
 

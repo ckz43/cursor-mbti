@@ -45,7 +45,7 @@ const router = createRouter({
       }
     }
   ],
-  scrollBehavior(to, from, savedPosition) {
+  scrollBehavior(_to, _from, savedPosition) {
     if (savedPosition) {
       return savedPosition
     } else {
@@ -55,7 +55,7 @@ const router = createRouter({
 })
 
 // 路由守卫 - 访问控制与标题
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   if (to.meta?.title) {
     document.title = to.meta.title as string
   }

@@ -225,7 +225,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAssessmentStore } from '@/stores/assessment'
 import { typeProfiles } from '@/data/profiles'
