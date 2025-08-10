@@ -1,0 +1,310 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 基础样式 */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply text-gray-900 bg-gray-50;
+  }
+  
+  * {
+    @apply box-border;
+  }
+}
+
+/* 自定义组件样式 */
+@layer components {
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .section-title {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 px-4 leading-tight;
+  }
+  
+  .section-subtitle {
+    @apply text-base sm:text-lg text-gray-600 leading-relaxed px-4;
+  }
+  
+  /* 改进的按钮样式 */
+  .btn-professional {
+    @apply inline-flex items-center gap-2 font-semibold px-6 py-3 rounded-xl
+           transition-all duration-300 focus-ring
+           transform hover:-translate-y-0.5 active:translate-y-0;
+  }
+  
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-secondary-500 
+           text-white font-semibold px-6 py-3 rounded-xl
+           hover:from-primary-600 hover:to-secondary-600 
+           transform hover:-translate-y-0.5 transition-all duration-300
+           shadow-primary hover:shadow-primary-strong;
+  }
+  
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 bg-white text-primary-600 font-semibold 
+           px-6 py-3 rounded-xl border border-primary-200
+           hover:bg-primary-50 hover:border-primary-300
+           transform hover:-translate-y-0.5 transition-all duration-300
+           shadow-soft hover:shadow-medium;
+  }
+  
+  .card {
+    @apply bg-white rounded-2xl shadow-soft hover:shadow-medium 
+           transition-all duration-300 overflow-hidden;
+  }
+  
+  .card-hover {
+    @apply transform hover:-translate-y-1 hover:scale-105;
+  }
+
+  /* 按钮动效统一样式 */
+  .btn-animate {
+    @apply transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-press {
+    @apply active:scale-95;
+  }
+
+  /* 光泽扫过效果 */
+  .btn-shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-shine::after {
+    content: "";
+    position: absolute;
+    top: -100%;
+    left: -50%;
+    width: 200%;
+    height: 300%;
+    background: linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.35) 50%, transparent 60%);
+    transform: translateX(-120%);
+    transition: transform 0.6s ease;
+    pointer-events: none;
+  }
+  .btn-shine:hover::after {
+    transform: translateX(0%);
+  }
+
+  /* 光泽扫过 - 自动循环版（无需 hover） */
+  .shine-loop {
+    position: relative;
+    overflow: hidden;
+  }
+  .shine-loop::after {
+    content: "";
+    position: absolute;
+    top: -120%;
+    left: -60%;
+    width: 220%;
+    height: 320%;
+    background: linear-gradient(120deg, transparent 42%, rgba(255,255,255,0.35) 50%, transparent 58%);
+    animation: shine-sweep 3.6s linear infinite;
+    pointer-events: none;
+  }
+
+  /* 轻微呼吸/脉冲注意力动效 */
+  .cta-attention {
+    animation: cta-pop 2.4s ease-in-out infinite;
+  }
+}
+
+  /* 工具类 */
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent;
+  }
+  
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  }
+  
+  .bg-gradient-soft {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  }
+  
+  .animate-in {
+    @apply animate-fade-in-up;
+  }
+  
+  /* 专业化阴影系统 */
+  .shadow-professional {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
+  
+  .shadow-professional-hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* 改进的焦点状态 */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+  
+  /* 无障碍对比度优化 */
+  .text-high-contrast {
+    @apply text-gray-900;
+  }
+  
+  .text-medium-contrast {
+    @apply text-gray-700;
+  }
+
+  /* 移动端优化 */
+  .mobile-optimized {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+  
+  .mobile-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  .mobile-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8;
+  }
+  
+  .mobile-text-large {
+    @apply text-lg sm:text-xl lg:text-2xl xl:text-3xl;
+  }
+  
+  .mobile-text-xl {
+    @apply text-xl sm:text-2xl lg:text-3xl xl:text-4xl;
+  }
+
+  /* 背景图案 */
+  .pattern-dots {
+    background-image: radial-gradient(circle, #9C92AC 1.5px, transparent 1.5px);
+    background-size: 60px 60px;
+    background-repeat: repeat;
+  }
+
+  /* 涟漪点击效果样式（配合 v-ripple 指令使用） */
+  .ripple-container {
+    position: relative;
+    overflow: hidden;
+  }
+  .ripple {
+    position: absolute;
+    border-radius: 9999px;
+    transform: scale(0);
+    animation: ripple 600ms linear;
+    background-color: currentColor;
+    opacity: 0.2;
+    pointer-events: none;
+  }
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* 涟漪动画关键帧 */
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* 光泽扫过 */
+@keyframes shine-sweep {
+  0% {
+    transform: translateX(-140%);
+  }
+  100% {
+    transform: translateX(140%);
+  }
+}
+
+/* CTA注意力动效 */
+@keyframes cta-pop {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 6px 16px rgba(0,0,0,0.08));
+  }
+  50% {
+    transform: translateY(-2px) scale(1.02);
+    filter: drop-shadow(0 10px 24px rgba(0,0,0,0.12));
+  }
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 移动端专用样式 */
+@media (max-width: 640px) {
+  .container {
+    @apply px-4;
+  }
+  
+  /* 确保Hero区域在小屏幕上不会太拥挤 */
+  .hero-section {
+    @apply pt-24 pb-16;
+  }
+  
+  /* 统计数字在移动端的优化显示 */
+  .stat-item {
+    @apply p-4 text-center;
+  }
+  
+  .stat-number {
+    @apply text-2xl font-bold;
+  }
+  
+  /* 角色卡片在移动端的网格布局 */
+  .character-grid {
+    @apply grid-cols-2 gap-3;
+  }
+  
+  /* 创始人头像在移动端的布局 */
+  .founders-grid {
+    @apply grid-cols-1 gap-6;
+  }
+  
+  /* 弹窗在移动端的优化 */
+  .modal-content {
+    @apply mx-2 rounded-xl;
+  }
+  
+  /* 时间轴在移动端的优化 */
+  .timeline-mobile {
+    @apply space-y-8;
+  }
+  
+  .timeline-item {
+    @apply flex-col text-center;
+  }
+  
+  .timeline-content {
+    @apply w-full mt-4;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  /* 平板端的优化 */
+  .character-grid {
+    @apply grid-cols-3 gap-4;
+  }
+  
+  .founders-grid {
+    @apply grid-cols-2 gap-6;
+  }
+}
