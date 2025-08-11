@@ -147,6 +147,23 @@ CREATE TABLE payment_orders (
     FOREIGN KEY (session_id) REFERENCES test_sessions(session_id) ON DELETE SET NULL
 ) COMMENT='支付订单表';
 
+-- 报告表（保存已付费用户的完整报告）
+CREATE TABLE reports (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    order_id VARCHAR(64) UNIQUE NOT NULL COMMENT '关联支付订单号',
+    user_id VARCHAR(64) NOT NULL COMMENT '用户ID',
+    session_id VARCHAR(64) COMMENT '测试会话ID',
+    mbti_type CHAR(4) NOT NULL COMMENT '最终MBTI类型',
+    proportions JSON COMMENT '各维度百分比 {EI,NS,TF,JP}',
+    content JSON COMMENT '报告详细内容（章节、建议等）',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_user_id (user_id),
+    INDEX idx_session_id (session_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (session_id) REFERENCES test_sessions(session_id) ON DELETE SET NULL
+) COMMENT='用户报告表';
+
 -- 用户行为日志表
 CREATE TABLE user_behavior_logs (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,

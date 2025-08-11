@@ -91,14 +91,40 @@ export class DataService {
       case 'saveBehaviorLog':
         await this.databaseService.logUserBehavior(data);
         break;
-      case 'createPaymentOrder':
-        await this.databaseService.createPaymentOrder(data);
+      case 'createPaymentOrder': {
+        // 兼容旧离线队列：若存在 openid/unionid 一并上传
+        const { openid, unionid, ...orderPayload } = data || {};
+        await this.databaseService.createPaymentOrder(orderPayload, openid, unionid);
         break;
+      }
       case 'createShareRecord':
         await this.databaseService.createShareRecord(data);
         break;
       default:
         console.warn('未知的同步操作:', action);
+    }
+  }
+
+  // ==================== 支付订单相关操作 ====================
+  
+  async createPaymentOrder(
+    orderData: Omit<PaymentOrder, 'id' | 'created_at' | 'updated_at'>,
+    openid?: string,
+    unionid?: string
+  ): Promise<PaymentOrder> {
+    if (this.isOnline) {
+      try {
+        const order = await this.databaseService.createPaymentOrder(orderData, openid, unionid);
+        await this.localStorageService.createPaymentOrder(orderData);
+        return order;
+      } catch (error) {
+        console.error('在线创建支付订单失败，使用本地存储:', error);
+        this.addToSyncQueue('createPaymentOrder', { ...orderData, ...(openid ? { openid } : {}), ...(unionid ? { unionid } : {}) });
+        return await this.localStorageService.createPaymentOrder(orderData);
+      }
+    } else {
+      this.addToSyncQueue('createPaymentOrder', { ...orderData, ...(openid ? { openid } : {}), ...(unionid ? { unionid } : {}) });
+      return await this.localStorageService.createPaymentOrder(orderData);
     }
   }
 
@@ -344,6 +370,11 @@ export class DataService {
     }
   }
 
+  // 别名方法，保持向后兼容
+  async logUserBehavior(logData: Omit<UserBehaviorLog, 'id' | 'created_at'>): Promise<UserBehaviorLog> {
+    return this.saveBehaviorLog(logData);
+  }
+
   async getUserBehaviorLogs(userId: number): Promise<UserBehaviorLog[]> {
     if (this.isOnline) {
       try {
@@ -363,22 +394,23 @@ export class DataService {
 
   // ==================== 支付订单相关操作 ====================
   
-  async createPaymentOrder(orderData: Omit<PaymentOrder, 'id' | 'created_at' | 'updated_at'>): Promise<PaymentOrder> {
-    if (this.isOnline) {
-      try {
-        const order = await this.databaseService.createPaymentOrder(orderData);
-        await this.localStorageService.createPaymentOrder(orderData);
-        return order;
-      } catch (error) {
-        console.error('在线创建支付订单失败，使用本地存储:', error);
-        this.addToSyncQueue('createPaymentOrder', orderData);
-        return await this.localStorageService.createPaymentOrder(orderData);
-      }
-    } else {
-      this.addToSyncQueue('createPaymentOrder', orderData);
-      return await this.localStorageService.createPaymentOrder(orderData);
-    }
-  }
+  // 旧实现开始——将被移除
+  // async createPaymentOrder(orderData: Omit<PaymentOrder, 'id' | 'created_at' | 'updated_at'>): Promise<PaymentOrder> {
+  //   if (this.isOnline) {
+  //     try {
+  //       const order = await this.databaseService.createPaymentOrder(orderData);
+  //       await this.localStorageService.createPaymentOrder(orderData);
+  //       return order;
+  //     } catch (error) {
+  //       console.error('在线创建支付订单失败，使用本地存储:', error);
+  //       this.addToSyncQueue('createPaymentOrder', orderData);
+  //       return await this.localStorageService.createPaymentOrder(orderData);
+  //     }
+  //   } else {
+  //     this.addToSyncQueue('createPaymentOrder', orderData);
+  //     return await this.localStorageService.createPaymentOrder(orderData);
+  //   }
+  // }
 
   async getPaymentOrderById(id: number): Promise<PaymentOrder | null> {
     if (this.isOnline) {
@@ -394,6 +426,25 @@ export class DataService {
       // 通过获取所有订单并过滤来实现
       const allOrders = await this.localStorageService.getAllPaymentOrders();
       return allOrders.find(o => o.id === id) || null;
+    }
+  }
+
+  async updatePaymentOrder(id: number | string, updateData: Partial<PaymentOrder>): Promise<PaymentOrder | null> {
+    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+    if (this.isOnline) {
+      try {
+        const updatedOrder = await this.databaseService.updatePaymentOrder(id.toString(), updateData);
+        // 同时更新本地存储
+        await this.localStorageService.updatePaymentOrder(numericId, updateData);
+        return updatedOrder;
+      } catch (error) {
+        console.error('在线更新支付订单失败，使用本地存储:', error);
+        this.addToSyncQueue('updatePaymentOrder', { id: numericId, ...updateData });
+        return await this.localStorageService.updatePaymentOrder(numericId, updateData);
+      }
+    } else {
+      this.addToSyncQueue('updatePaymentOrder', { id: numericId, ...updateData });
+      return await this.localStorageService.updatePaymentOrder(numericId, updateData);
     }
   }
 

@@ -1,0 +1,135 @@
+{
+  "description": "测试阶段虚拟数据配置文件",
+  "version": "1.0.0",
+  "environment": "development",
+  "lastUpdated": "2024-12-19",
+  "mockFields": {
+    "paymentOrders": {
+      "description": "支付订单表的虚拟字段",
+      "fields": {
+        "discount_amount": {
+          "type": "calculated",
+          "description": "优惠金额，通过 original_amount - final_amount 计算",
+          "isMock": true,
+          "productionSource": "promotion system"
+        },
+        "coupon_code": {
+          "type": "generated",
+          "description": "优惠券代码，测试阶段生成虚拟码",
+          "isMock": true,
+          "pattern": "TEST_{price}_{timestamp}",
+          "productionSource": "coupon management system"
+        },
+        "promotion_id": {
+          "type": "mapped",
+          "description": "促销活动ID，根据价格映射",
+          "isMock": true,
+          "mapping": {
+            "39.9": "PROMO_STANDARD_001",
+            "29.9": "PROMO_DISCOUNT_001",
+            "19.9": "PROMO_FINAL_001"
+          },
+          "productionSource": "promotion management system"
+        },
+        "trade_no": {
+          "type": "generated",
+          "description": "第三方交易号，支付成功后生成",
+          "isMock": true,
+          "pattern": "MOCK_TRADE_{timestamp}_{random}",
+          "productionSource": "payment gateway"
+        },
+        "prepay_id": {
+          "type": "generated",
+          "description": "预支付ID，调用支付接口时生成",
+          "isMock": true,
+          "pattern": "MOCK_PREPAY_{timestamp}_{random}",
+          "productionSource": "wechat pay API"
+        },
+        "remark": {
+          "type": "fixed",
+          "description": "订单备注，测试环境标识",
+          "isMock": true,
+          "value": "测试环境订单 - 虚拟支付",
+          "productionSource": "user input or system generated"
+        }
+      }
+    },
+    "userBehaviorLogs": {
+      "description": "用户行为日志表的虚拟字段",
+      "fields": {
+        "event_type": {
+          "type": "mapped",
+          "description": "事件类型，从action映射",
+          "isMock": false,
+          "mapping": {
+            "payment_initiated": "payment_start",
+            "payment_success": "payment_complete",
+            "payment_failed": "payment_error",
+            "payment_error": "payment_error"
+          }
+        },
+        "event_category": {
+          "type": "mapped",
+          "description": "事件分类",
+          "isMock": false,
+          "mapping": {
+            "payment_initiated": "payment",
+            "payment_success": "payment",
+            "payment_failed": "payment",
+            "payment_error": "payment"
+          }
+        },
+        "page_url": {
+          "type": "detected",
+          "description": "页面URL，从window.location获取",
+          "isMock": false
+        },
+        "referrer_url": {
+          "type": "detected",
+          "description": "来源URL，从document.referrer获取",
+          "isMock": false
+        },
+        "device_type": {
+          "type": "parsed",
+          "description": "设备类型，从user_agent解析",
+          "isMock": false
+        },
+        "browser_name": {
+          "type": "parsed",
+          "description": "浏览器名称，从user_agent解析",
+          "isMock": false
+        },
+        "browser_version": {
+          "type": "parsed",
+          "description": "浏览器版本，从user_agent解析",
+          "isMock": false
+        },
+        "os_name": {
+          "type": "parsed",
+          "description": "操作系统，从user_agent解析",
+          "isMock": false
+        },
+        "viewport_width": {
+          "type": "detected",
+          "description": "视口宽度，从window.innerWidth获取",
+          "isMock": false
+        },
+        "viewport_height": {
+          "type": "detected",
+          "description": "视口高度，从window.innerHeight获取",
+          "isMock": false
+        }
+      }
+    }
+  },
+  "migrationPlan": {
+    "description": "生产环境迁移计划",
+    "steps": [
+      "1. 集成真实的优惠券系统",
+      "2. 连接促销活动管理系统",
+      "3. 接入微信支付API获取真实trade_no和prepay_id",
+      "4. 实现用户自定义备注功能",
+      "5. 移除测试环境标识"
+    ]
+  }
+}

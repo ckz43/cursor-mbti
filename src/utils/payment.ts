@@ -57,12 +57,13 @@ export const invokeWechatPay = (config: WechatPayConfig): Promise<PaymentResult>
       return
     }
 
+    // v3 使用 signType=RSA
     window.WeixinJSBridge.invoke('getBrandWCPayRequest', {
       appId: config.appId,
       timeStamp: config.timeStamp,
       nonceStr: config.nonceStr,
       package: config.package,
-      signType: config.signType,
+      signType: config.signType || 'RSA',
       paySign: config.paySign
     }, (res: any) => {
       if (res.err_msg === 'get_brand_wcpay_request:ok') {
@@ -103,16 +104,26 @@ export const createPaymentOrder = async (amount: number, productName: string): P
       }
     }
     
-    // 生产环境调用真实API
-    const response = await fetch('/api/payment/create', {
+    // 生产环境调用真实API：使用统一的支付订单接口
+    const userId = localStorage.getItem('user_id') || `user_${Date.now()}`
+    localStorage.setItem('user_id', userId)
+    const sessionId = localStorage.getItem('session_id') || null
+    const openid = localStorage.getItem('wechat_openid') || null
+    const response = await fetch('/api/payment-orders', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        amount: amount * 100, // 转换为分
-        productName,
-        productType: 'mbti_report'
+        user_id: userId,
+        session_id: sessionId,
+        product_type: 'premium_report',
+        product_name: productName,
+        original_amount: amount * 100,
+        final_amount: amount * 100,
+        currency: 'CNY',
+        payment_method: 'wechat',
+        openid
       })
     })
 
@@ -121,7 +132,7 @@ export const createPaymentOrder = async (amount: number, productName: string): P
     }
 
     const data = await response.json()
-    return data.paymentConfig
+    return data?.data?.paymentConfig || null
   } catch (error) {
     console.error('创建支付订单失败:', error)
     return null

@@ -216,27 +216,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { typeProfiles } from '@/data/profiles'
 import { useAssessmentStore } from '@/stores/assessment'
 import RadarChart from '@/components/UI/RadarChart.vue'
 
 const router = useRouter()
+const route = useRoute()
 
 const store = useAssessmentStore()
-const currentType = computed(() => store.finished ? store.mbtiType : 'ENFP')
+const serverReport = ref<any | null>(null)
+const currentType = computed(() => serverReport.value?.mbti_type || (store.finished ? store.mbtiType : 'ENFP'))
 const profile = computed(() => typeProfiles[currentType.value] || typeProfiles['ENFP'])
 
 // 计算维度百分比
-const proportions = computed(() => {
-  return store.proportions
-})
-
-// 维度分数（与proportions相同，但提供不同的访问方式）
-const dimensionScores = computed(() => {
-  return store.proportions
-})
+const proportions = computed(() => serverReport.value?.proportions || store.proportions)
 
 // 维度标签
 const dimensionLabels = {
@@ -318,7 +313,12 @@ const dynamicSections = computed(() => [
     icon: '🧠',
       description: expanded.value.personality,
       strengths: profile.value.personality.traits,
-      challenges: profile.value.career.challenges.slice(0, 4),
+      challenges: [
+        '过度依赖主导功能可能导致思维局限',
+        '第三、第四功能发展不足影响全面性',
+        '在压力下可能出现功能失衡',
+        '忽视非优势功能的重要价值'
+      ],
     tips: profile.value.growth
   },
     {
@@ -328,7 +328,11 @@ const dynamicSections = computed(() => [
       icon: '⭐',
       description: '与你类型相近的公众人物：' + profile.value.celebrities.join('、'),
       strengths: profile.value.personality.traits.slice(0, 4),
-      challenges: profile.value.career.challenges.slice(0, 3),
+      challenges: [
+        '避免过度模仿他人的成功路径',
+        '保持自己独特的个性特色',
+        '不要因为相似性而限制自己的可能性'
+      ],
       tips: []
     },
     {
@@ -373,4 +377,21 @@ const dynamicSummary = computed(() => ({
 const goBack = () => {
   router.push('/result')
 }
+
+onMounted(async () => {
+  const orderId = route.query.orderId as string | undefined
+  if (!orderId) return
+  try {
+    const resp = await fetch(`/api/reports/by-order/${orderId}`)
+    if (resp.ok) {
+      const json = await resp.json()
+      serverReport.value = json.data
+      if (serverReport.value?.mbti_type) {
+        store.setOverrideType(serverReport.value.mbti_type)
+      }
+      store.setFinished(true)
+      store.setPaid(true)
+    }
+  } catch {}
+})
 </script>

@@ -386,6 +386,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAssessmentStore } from '@/stores/assessment'
 import ScientificFoundation from '@/components/Authority/ScientificFoundation.vue'
 import FoundersSection from '@/components/Authority/FoundersSection.vue'
 
@@ -399,20 +400,40 @@ const startTest = () => {
   router.push('/test')
 }
 
-const handleRecover = () => {
+const store = useAssessmentStore()
+
+const handleRecover = async () => {
   if (!recoverInput.value.trim()) {
     return
   }
-  
-  // 这里可以添加实际的找回逻辑
-  // 比如调用API根据交易单号查询报告
-  console.log('根据交易单号查找报告:', recoverInput.value)
-  
-  // 模拟查找过程
-  alert(`正在根据交易单号为您查找报告，请稍候...\n交易单号：${recoverInput.value}`)
-  
-  // 清空输入并关闭弹窗
-  recoverInput.value = ''
-  showRecoverModal.value = false
+  const orderId = recoverInput.value.trim()
+  try {
+    // 校验订单存在且已支付
+    const orderResp = await fetch(`/api/payment-orders/${orderId}`)
+    if (!orderResp.ok) {
+      alert('订单不存在，请核对交易单号')
+      return
+    }
+    const orderData = await orderResp.json()
+    if (!orderData?.data || orderData.data.payment_status !== 1) {
+      alert('订单尚未支付完成或正在处理，请稍后再试')
+      return
+    }
+    // 拉取报告
+    const reportResp = await fetch(`/api/reports/by-order/${orderId}`)
+    if (!reportResp.ok) {
+      alert('报告尚未生成，请稍后再试')
+      return
+    }
+    // 本地放行访问
+    store.setFinished(true)
+    store.setPaid(true)
+    router.push({ name: 'Report', query: { orderId } })
+  } catch (e) {
+    alert('找回失败，请稍后重试')
+  } finally {
+    recoverInput.value = ''
+    showRecoverModal.value = false
+  }
 }
 </script>

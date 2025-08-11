@@ -14,16 +14,10 @@ const scaleValues = [1.5, 0.5, -0.5, -1.5] // 与选项顺序对应：非常符�
 
 export const useAssessmentStore = defineStore('assessment', {
   state: (): AssessmentState => ({
-    answers: [
-      // 创建更合理的测试数据分布 - 生成ENFP类型
-      ...Array(23).fill(0).map(() => Math.floor(Math.random() * 2)), // EI维度：偏向E
-      ...Array(23).fill(0).map(() => Math.floor(Math.random() * 3) + 1), // NS维度：偏向N
-      ...Array(24).fill(0).map(() => Math.floor(Math.random() * 2) + 2), // TF维度：偏向F
-      ...Array(23).fill(0).map(() => Math.floor(Math.random() * 2))  // JP维度：偏向P
-    ],
-    finished: true, // 设置为已完成
-    paid: true, // 设置为已付费
-    overrideType: null,
+    answers: loadPersistedAnswers(),
+    finished: loadPersistedFlag('assessment_finished'),
+    paid: loadPersistedFlag('assessment_paid'),
+    overrideType: loadPersistedOverrideType(),
   }),
   getters: {
     totalQuestions: () => mapping93.length,
@@ -84,20 +78,26 @@ export const useAssessmentStore = defineStore('assessment', {
     reset() {
       this.answers = []
       this.finished = false
-      // 不重置 paid，允许同一用户多次测试且保留解锁状态
-      // 不重置 overrideType，便于开发者在一次会话内切换演示
+      // 不重置付费状态，用户已解锁的权限保留
+      // 同步本地存储
+      persistAnswers(this.answers)
+      persistFlag('assessment_finished', this.finished)
     },
     recordAnswer(answerIdx: number) {
       this.answers.push(answerIdx)
+      persistAnswers(this.answers)
     },
     setFinished(v: boolean) {
       this.finished = v
+      persistFlag('assessment_finished', v)
     },
     setPaid(v: boolean) {
       this.paid = v
+      persistFlag('assessment_paid', v)
     },
     setOverrideType(type: string | null) {
       this.overrideType = type
+      persistOverrideType(type)
     }
   }
 })
@@ -105,5 +105,56 @@ export const useAssessmentStore = defineStore('assessment', {
 function flipType(type: string): string {
   const flipLetter = (c: string) => ({ E: 'I', I: 'E', N: 'S', S: 'N', T: 'F', F: 'T', J: 'P', P: 'J' } as Record<string, string>)[c] || c
   return type.split('').map(flipLetter).join('')
+}
+
+// ========== 本地持久化工具 ==========
+function loadPersistedAnswers(): number[] {
+  try {
+    const raw = localStorage.getItem('assessment_answers')
+    if (!raw) return []
+    const arr = JSON.parse(raw)
+    return Array.isArray(arr) ? arr.filter((n) => Number.isInteger(n)) : []
+  } catch {
+    return []
+  }
+}
+
+function persistAnswers(answers: number[]): void {
+  try {
+    localStorage.setItem('assessment_answers', JSON.stringify(answers))
+  } catch {}
+}
+
+function loadPersistedFlag(key: string): boolean {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw === 'true'
+  } catch {
+    return false
+  }
+}
+
+function persistFlag(key: string, value: boolean): void {
+  try {
+    localStorage.setItem(key, value ? 'true' : 'false')
+  } catch {}
+}
+
+function loadPersistedOverrideType(): string | null {
+  try {
+    return localStorage.getItem('assessment_overrideType') || null
+  } catch {
+    return null
+  }
+}
+
+function persistOverrideType(type: string | null): void {
+  try {
+    if (type === null) {
+      localStorage.removeItem('assessment_overrideType')
+    } else {
+      localStorage.setItem('assessment_overrideType', type)
+    }
+  } catch {}
 }
 

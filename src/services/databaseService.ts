@@ -1,5 +1,7 @@
 // 后端数据库服务 - 实际的MySQL连接和操作
 import mysql from 'mysql2/promise';
+// @ts-ignore
+import config from '../../config/index.js';
 import type { 
   User, 
   TestSession, 
@@ -15,18 +17,14 @@ export class DatabaseService {
 
   constructor() {
     this.pool = mysql.createPool({
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '3306'),
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'mbti_test',
+      host: config.db.host,
+      port: config.db.port,
+      user: config.db.user,
+      password: config.db.password,
+      database: config.db.database,
       waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0,
-      acquireTimeout: 60000,
-      timeout: 60000,
-      reconnect: true,
-      charset: 'utf8mb4'
+      connectionLimit: config.db.pool.connectionLimit,
+      queueLimit: config.db.pool.queueLimit
     });
 
     this.initializeConnection();
@@ -372,19 +370,27 @@ export class DatabaseService {
     try {
       const [result] = await connection.execute(
         `INSERT INTO payment_orders (
-          order_id, user_id, session_id, amount, currency, payment_method,
-          payment_status, transaction_id, payment_data
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          order_id, user_id, session_id, product_type, product_name, original_amount, 
+          discount_amount, final_amount, currency, payment_method, payment_status, 
+          trade_no, prepay_id, ip_address, user_agent, remark
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           orderData.order_id,
           orderData.user_id,
           orderData.session_id,
-          orderData.amount,
-          orderData.currency,
+          orderData.product_type,
+          orderData.product_name,
+          orderData.original_amount,
+          orderData.discount_amount || 0,
+          orderData.final_amount,
+          orderData.currency || 'CNY',
           orderData.payment_method,
-          orderData.payment_status,
-          orderData.transaction_id,
-          JSON.stringify(orderData.payment_data)
+          orderData.payment_status || 0,
+          orderData.trade_no,
+          orderData.prepay_id,
+          orderData.ip_address,
+          orderData.user_agent,
+          orderData.remark
         ]
       ) as mysql.ResultSetHeader[];
 
@@ -405,17 +411,20 @@ export class DatabaseService {
     try {
       const [result] = await connection.execute(
         `INSERT INTO share_records (
-          user_id, session_id, share_type, share_platform, share_content,
-          share_url, share_image_url
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          share_id, user_id, session_id, share_type, share_platform, share_content,
+          share_url, view_count, click_count, conversion_count
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
+          shareData.share_id,
           shareData.user_id,
           shareData.session_id,
           shareData.share_type,
           shareData.share_platform,
-          JSON.stringify(shareData.share_content),
+          JSON.stringify(shareData.share_content || {}),
           shareData.share_url,
-          shareData.share_image_url
+          shareData.view_count || 0,
+          shareData.click_count || 0,
+          shareData.conversion_count || 0
         ]
       ) as mysql.ResultSetHeader[];
 

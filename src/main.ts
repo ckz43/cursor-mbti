@@ -127,6 +127,14 @@ const router = createRouter({
       meta: {
         title: '详细报告 - MBTI深度解析'
       }
+    },
+    {
+      path: '/admin',
+      name: 'Admin',
+      component: () => import('./views/Admin.vue'),
+      meta: {
+        title: '管理后台 - MBTI系统管理'
+      }
     }
   ],
   scrollBehavior(to, from, savedPosition) {
@@ -164,23 +172,7 @@ const app = createApp(App)
 app.use(pinia)
 app.use(router)
 
-// 暴露开发者后门，便于控制台快速预览类型与跳转
-;(window as any).__MBTI_DEV__ = {
-  store: () => useAssessmentStore(pinia),
-  setType: (type: string | null) => useAssessmentStore(pinia).setOverrideType(type),
-  setFinished: (v: boolean) => useAssessmentStore(pinia).setFinished(v),
-  setPaid: (v: boolean) => useAssessmentStore(pinia).setPaid(v),
-  goto: (path: string) => router.push(path),
-  // 一键预览：设置完成+付费+类型，并进入生成中转页
-  preview: (type: string) => {
-    const s = useAssessmentStore(pinia)
-    s.setFinished(true)
-    s.setPaid(true)
-    s.setOverrideType(type)
-    router.push('/generating')
-  }
-}
-;(window as any).MBTI_DEV = (window as any).__MBTI_DEV__
+// 生产/正式环境不暴露任何调试后门
 
 // v-ripple 指令：给按钮添加点击涟漪效果
 app.directive('ripple', {
@@ -202,6 +194,43 @@ app.directive('ripple', {
     })
   }
 })
+
+// 微信环境 openid/unionid 捕获
+const captureWechatUserInfo = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
+  
+  // 从 URL 参数获取 openid 和 unionid
+  const openid = urlParams.get('openid') || hashParams.get('openid');
+  const unionid = urlParams.get('unionid') || hashParams.get('unionid');
+  
+  if (openid) {
+    localStorage.setItem('wechat_openid', openid);
+    console.log('✅ 捕获到微信 openid:', openid);
+  }
+  
+  if (unionid) {
+    localStorage.setItem('wechat_unionid', unionid);
+    console.log('✅ 捕获到微信 unionid:', unionid);
+  }
+  
+  // 清理 URL 参数，避免敏感信息暴露
+  if (openid || unionid) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('openid');
+    url.searchParams.delete('unionid');
+    window.history.replaceState({}, document.title, url.toString());
+  }
+}
+
+// 获取存储的微信用户信息
+export const getWechatUserInfo = () => ({
+  openid: localStorage.getItem('wechat_openid'),
+  unionid: localStorage.getItem('wechat_unionid')
+});
+
+// 在应用初始化时捕获微信用户信息
+captureWechatUserInfo();
 
 // 初始化数据服务
 initializeDataServices().then((success) => {

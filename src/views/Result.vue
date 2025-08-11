@@ -455,8 +455,15 @@ import { useRouter } from 'vue-router'
 import { useAssessmentStore } from '@/stores/assessment'
 import { useEnhancedAssessmentStore } from '@/stores/enhancedAssessment'
 import { typeProfiles } from '@/data/profiles'
-import { handlePayment, isWechatBrowser } from '@/utils/payment'
+import { isWechatBrowser } from '@/utils/payment'
 import { dataService } from '@/services/dataService'
+import { getWechatUserInfo } from '@/main'
+import { 
+  PaymentOrderDataGenerator, 
+  UserBehaviorDataGenerator, 
+  DataIntegrityValidator,
+  EnvironmentUtils 
+} from '@/utils/dataIntegrity'
 
 const router = useRouter()
 
@@ -600,87 +607,145 @@ const proceedPayment = async (price: number) => {
   showFinalDiscountModal.value = false
   
   try {
-    // 创建支付订单数据（模拟数据）
-    const orderData = {
-      user_id: assessmentStore.userId || 'user_' + Date.now(),
-      session_id: assessmentStore.sessionId,
-      product_type: 'premium_report' as const,
-      amount: price,
-      currency: 'CNY',
-      status: 'pending' as const,
-      payment_method: 'wechat'
+    // 使用数据完整性工具创建支付订单数据
+    const orderDataGenerator = new PaymentOrderDataGenerator()
+    const behaviorGenerator = new UserBehaviorDataGenerator()
+    const validator = new DataIntegrityValidator()
+    
+    const orderData = orderDataGenerator.generatePaymentOrder({
+      userId: assessmentStore.userId || 'user_' + Date.now(),
+      sessionId: assessmentStore.sessionId,
+      productType: 'premium_report',
+      productName: 'MBTI性格测试完整报告',
+      originalAmount: price,
+      finalAmount: price,
+      paymentMethod: 'wechat'
+    })
+    
+    // 验证订单数据完整性
+    if (!validator.validatePaymentOrder(orderData)) {
+      throw new Error('订单数据验证失败')
     }
     
-    // 保存订单到数据服务
-    const order = await dataService.createPaymentOrder(orderData)
+    // 获取微信 openid/unionid
+    const { openid, unionid } = getWechatUserInfo()
+    
+    // 保存订单到数据服务（传递 openid/unionid，后端会生成 prepay_id 等）
+    const order = await dataService.createPaymentOrder(orderData, openid || undefined, unionid || undefined)
     console.log('订单创建成功:', order)
     
-    // 记录用户行为
-    await dataService.logUserBehavior({
-      user_id: assessmentStore.userId || 'user_' + Date.now(),
-      session_id: assessmentStore.sessionId,
+    // 记录“支付发起”行为
+    const behaviorData = behaviorGenerator.generateUserBehavior({
+      userId: assessmentStore.userId || 'user_' + Date.now(),
+      sessionId: assessmentStore.sessionId,
       action: 'payment_initiated',
       page: 'result',
-      details: { price, product: 'MBTI性格测试完整报告', orderId: order.id }
+      details: { price, product: 'MBTI性格测试完整报告', orderId: order.id },
+      environment: EnvironmentUtils.getEnvironmentInfo()
     })
+    if (validator.validateUserBehavior(behaviorData)) {
+      await dataService.logUserBehavior(behaviorData)
+    }
     
-    const result = await handlePayment(price, 'MBTI性格测试完整报告')
+    // 调起微信支付（开发环境由 utils/payment.ts 内部模拟 isWechatBrowser & WeixinJSBridge）
+    let paySuccess = false
+    let payMessage = '支付失败，请重试'
     
-    if (result.success) {
-      // 更新订单状态为已支付
-      await dataService.updatePaymentOrder(order.id, {
-        status: 'paid',
-        payment_id: 'mock_payment_' + Date.now()
-      })
+    if (import.meta.env.DEV) {
+      // 开发环境模拟支付成功
+      await new Promise(r => setTimeout(r, 1200))
+      paySuccess = true
+      payMessage = '支付成功（开发环境模拟）'
+    } else {
+      // 生产环境依赖 WeixinJSBridge
+      if (typeof window.WeixinJSBridge === 'undefined') {
+        throw new Error('微信支付环境未就绪，请稍后重试')
+      }
+      // 根据后端模型，优先使用 prepay_id；如后端返回 paymentConfig 则优先
+      const paymentConfig = (order as any).paymentConfig || null
+      if (paymentConfig) {
+        await new Promise<void>((resolve) => {
+          window.WeixinJSBridge.invoke('getBrandWCPayRequest', paymentConfig, (res: any) => {
+            if (res.err_msg === 'get_brand_wcpay_request:ok') {
+              paySuccess = true
+              payMessage = '支付成功'
+            } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
+              paySuccess = false
+              payMessage = '用户取消支付'
+            } else {
+              paySuccess = false
+              payMessage = '支付失败，请重试'
+            }
+            resolve()
+          })
+        })
+      } else if (order.prepay_id) {
+        // 若仅返回 prepay_id，这里通常还需要服务端签名生成 config；
+        // 本项目后端暂未提供签名端点，先提示失败并记录日志
+        throw new Error('缺少支付配置(paymentConfig)。请在后端完成JSAPI签名返回。')
+      } else {
+        throw new Error('后端未返回支付配置或预支付ID')
+      }
+    }
+    
+    if (paySuccess) {
+      const paymentSuccessData = PaymentOrderDataGenerator.generatePaymentSuccessData(order.order_id)
+      await dataService.updatePaymentOrder(order.id!, paymentSuccessData)
       
-      // 记录支付成功行为
-      await dataService.logUserBehavior({
-        user_id: assessmentStore.userId || 'user_' + Date.now(),
-        session_id: assessmentStore.sessionId,
+      const successBehaviorData = behaviorGenerator.generateUserBehavior({
+        userId: assessmentStore.userId || 'user_' + Date.now(),
+        sessionId: assessmentStore.sessionId,
         action: 'payment_success',
         page: 'result',
-        details: { orderId: order.id, amount: price }
+        details: { orderId: order.id, amount: price },
+        environment: EnvironmentUtils.getEnvironmentInfo()
       })
-      
-      // 设置付费状态
+      if (validator.validateUserBehavior(successBehaviorData)) {
+        await dataService.logUserBehavior(successBehaviorData)
+      }
       assessmentStore.setPaid(true)
-      
+      // 同步基础测评存储，确保路由守卫放行
+      try {
+        const baseStoreModule = await import('@/stores/assessment')
+        const baseStore = baseStoreModule.useAssessmentStore()
+        baseStore.setPaid(true)
+      } catch (e) {
+        console.warn('同步基础store付费状态失败（可忽略）', e)
+      }
       paymentMessage.value = '支付成功！正在跳转...'
-      // 支付成功后跳转到报告页
-      setTimeout(() => {
-        router.push('/report')
-      }, 1500)
+      setTimeout(() => { router.push('/report') }, 1500)
     } else {
-      // 更新订单状态为失败
-      await dataService.updatePaymentOrder(order.id, {
-        status: 'failed'
-      })
-      
-      // 记录支付失败行为
-      await dataService.logUserBehavior({
-        user_id: assessmentStore.userId || 'user_' + Date.now(),
-        session_id: assessmentStore.sessionId,
+      await dataService.updatePaymentOrder(order.id!, { payment_status: 2 })
+      const failedBehaviorData = behaviorGenerator.generateUserBehavior({
+        userId: assessmentStore.userId || 'user_' + Date.now(),
+        sessionId: assessmentStore.sessionId,
         action: 'payment_failed',
         page: 'result',
-        details: { orderId: order.id, error: result.message }
+        details: { orderId: order.id, error: payMessage },
+        environment: EnvironmentUtils.getEnvironmentInfo()
       })
-      
-      paymentMessage.value = result.message
+      if (validator.validateUserBehavior(failedBehaviorData)) {
+        await dataService.logUserBehavior(failedBehaviorData)
+      }
+      paymentMessage.value = payMessage
       setTimeout(() => paymentMessage.value = '', 3000)
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('支付失败:', error)
-    
-    // 记录支付错误行为
-    await dataService.logUserBehavior({
-      user_id: assessmentStore.userId || 'user_' + Date.now(),
-      session_id: assessmentStore.sessionId,
+    const behaviorGenerator = new UserBehaviorDataGenerator()
+    const validator = new DataIntegrityValidator()
+    const errorBehaviorData = behaviorGenerator.generateUserBehavior({
+      userId: assessmentStore.userId || 'user_' + Date.now(),
+      sessionId: assessmentStore.sessionId,
       action: 'payment_error',
       page: 'result',
-      details: { error: error.message }
+      details: { error: error?.message || String(error) },
+      environment: EnvironmentUtils.getEnvironmentInfo()
     })
-    
-    paymentMessage.value = '支付失败，请重试'
+    if (validator.validateUserBehavior(errorBehaviorData)) {
+      await dataService.logUserBehavior(errorBehaviorData)
+    }
+    paymentMessage.value = error?.message || '支付失败，请重试'
     setTimeout(() => paymentMessage.value = '', 3000)
   } finally {
     isPaymentLoading.value = false

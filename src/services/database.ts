@@ -96,9 +96,11 @@ export interface PaymentOrder {
   currency?: string;
   payment_method?: string;
   payment_status?: number;
+  payment_id?: string;
   trade_no?: string;
   prepay_id?: string;
   payment_time?: Date;
+  paid_at?: string;
   refund_time?: Date;
   refund_reason?: string;
   coupon_code?: string;
@@ -274,8 +276,27 @@ class DataService {
   }
 
   // 支付订单相关操作
-  async createPaymentOrder(order: Omit<PaymentOrder, 'id' | 'created_at' | 'updated_at'>): Promise<PaymentOrder> {
-    return this.api.post<PaymentOrder>('/payment-orders', order);
+  async createPaymentOrder(order: Omit<PaymentOrder, 'id' | 'created_at' | 'updated_at'>, openid?: string, unionid?: string): Promise<PaymentOrder> {
+    // 只发送后端API需要的字段
+    const requestData: any = {
+      user_id: order.user_id,
+      session_id: order.session_id,
+      product_type: order.product_type,
+      amount: order.final_amount, // 后端使用amount字段
+      currency: order.currency,
+      payment_method: order.payment_method
+    };
+
+    // 如果提供了 openid 或 unionid，一并传递给后端
+    if (openid) {
+      requestData.openid = openid;
+    }
+    if (unionid) {
+      requestData.unionid = unionid;
+    }
+    
+    const response = await this.api.post<{success: boolean, data: any}>('/payment-orders', requestData);
+    return response.data;
   }
 
   async getPaymentOrder(orderId: string): Promise<PaymentOrder | null> {
@@ -286,7 +307,7 @@ class DataService {
     }
   }
 
-  async updatePaymentOrder(orderId: string, updates: Partial<PaymentOrder>): Promise<PaymentOrder> {
+  async updatePaymentOrder(orderId: number | string, updates: Partial<PaymentOrder>): Promise<PaymentOrder> {
     return this.api.put<PaymentOrder>(`/payment-orders/${orderId}`, updates);
   }
 

@@ -4,6 +4,20 @@
 
 本文档描述了MBTI测试系统的数据服务接口，包括前端数据服务、后端API接口和本地存储服务。
 
+## 服务器配置
+
+### CORS跨域配置
+- **支持的源**: `http://localhost:5173`, `http://localhost:5174`, `http://localhost:5175`
+- **凭据支持**: 启用 (credentials: true)
+- **配置文件**: `.env` 中的 `CORS_ORIGIN` 环境变量
+- **格式**: 多个域名用逗号分隔
+
+### 服务端点
+- **后端API**: `http://localhost:3001`
+- **健康检查**: `http://localhost:3001/health`
+- **管理后台**: `http://localhost:3001/api/admin`
+- **前端API**: `http://localhost:3001/api`
+
 ## 数据服务架构
 
 ### 1. 混合数据访问模式
@@ -48,6 +62,70 @@ interface TestSession {
   ip_address?: string;
   created_at: Date;
   updated_at: Date;
+}
+```
+
+#### PaymentOrder (支付订单)
+```typescript
+interface PaymentOrder {
+  id?: number;
+  order_id: string;
+  user_id: string;
+  session_id?: string;
+  product_type: string;
+  product_name: string;
+  original_amount: number;
+  discount_amount?: number;
+  final_amount: number;
+  currency?: string;
+  payment_method?: string;
+  payment_status?: number; // 0: 待支付, 1: 已支付, 2: 支付失败, 3: 已退款
+  payment_id?: string;
+  trade_no?: string;
+  prepay_id?: string;
+  payment_time?: Date;
+  paid_at?: string;
+  refund_time?: Date;
+  refund_reason?: string;
+  coupon_code?: string;
+  promotion_id?: string;
+  ip_address?: string;
+  user_agent?: string;
+  remark?: string;
+  created_at?: Date;
+  updated_at?: Date;
+}
+```
+
+#### UserBehaviorLog (用户行为日志)
+```typescript
+interface UserBehaviorLog {
+  id?: number;
+  user_id: string;
+  session_id?: string;
+  event_type: string;
+  event_category?: string;
+  event_action?: string;
+  event_label?: string;
+  page_url?: string;
+  page_title?: string;
+  referrer_url?: string;
+  element_id?: string;
+  element_class?: string;
+  element_text?: string;
+  custom_data?: any;
+  duration_ms?: number;
+  scroll_depth?: number;
+  viewport_width?: number;
+  viewport_height?: number;
+  device_type?: string;
+  browser_name?: string;
+  browser_version?: string;
+  os_name?: string;
+  os_version?: string;
+  ip_address?: string;
+  user_agent?: string;
+  created_at?: Date;
 }
 ```
 
@@ -321,6 +399,155 @@ GET /api/answers/stats/:sessionId?
   averageTime: number,
   completion: number
 }
+```
+
+### 支付订单接口 (/api/payment-orders)
+
+#### 创建支付订单
+```
+POST /api/payment-orders
+Body: {
+  user_id: string,                    // 必需，用户ID（如不存在会自动创建用户）
+  session_id?: string,                // 可选，测试会话ID（如不存在会自动创建）
+  product_type: 'basic_report' | 'premium_report' | 'career_guidance',  // 必需
+  product_name?: string,              // 可选，产品名称
+  original_amount?: number,           // 可选，原价
+  discount_amount?: number,           // 可选，折扣金额
+  final_amount: number,               // 必需，最终金额（或使用amount字段兼容）
+  amount?: number,                    // 兼容字段，等同于final_amount
+  currency?: string,                  // 可选，货币类型，默认CNY
+  payment_method?: string,            // 可选，支付方式，如 'wechat'
+  payment_status?: number,            // 可选，支付状态，默认0
+  trade_no?: string,                  // 可选，交易号
+  prepay_id?: string,                 // 可选，预支付ID
+  ip_address?: string,                // 可选，IP地址
+  user_agent?: string,                // 可选，用户代理
+  remark?: string,                    // 可选，备注
+  openid?: string,                    // 可选，微信用户唯一标识（JSAPI支付建议传）
+  unionid?: string                    // 可选，微信开放平台唯一标识
+}
+响应: 
+{
+  success: boolean,
+  data: {
+    // PaymentOrder 字段...
+    id: number,
+    order_id: string,
+    user_id: string,
+    session_id?: string,
+    product_type: string,
+    product_name: string,
+    original_amount: number,
+    discount_amount?: number,
+    final_amount: number,
+    currency?: string,
+    payment_method?: string,
+    payment_status?: number,
+    trade_no?: string,
+    prepay_id?: string,
+    payment_time?: string,
+    created_at?: string,
+    updated_at?: string,
+
+    // 当支付方式为微信且服务端配置可用时，data 内将额外包含：
+    paymentConfig?: {
+      appId: string,
+      timeStamp: string,
+      nonceStr: string,
+      package: string,      // 形如 'prepay_id=***'
+      signType: 'MD5',
+      paySign: string
+    }
+  }
+}
+
+示例（包含支付配置）:
+{
+  "success": true,
+  "data": {
+    "id": 101,
+    "order_id": "order_173..",
+    "user_id": "u_123",
+    "product_type": "premium_report",
+    "product_name": "MBTI完整报告",
+    "final_amount": 39.9,
+    "currency": "CNY",
+    "payment_method": "wechat",
+    "prepay_id": "wx173...",
+    "payment_status": 0,
+    "created_at": "2025-08-11 12:00:00",
+    "updated_at": "2025-08-11 12:00:00",
+    "paymentConfig": {
+      "appId": "wx...",
+      "timeStamp": "1733980000",
+      "nonceStr": "5e1f...",
+      "package": "prepay_id=wx173...",
+      "signType": "MD5",
+      "paySign": "F3A9..."
+    }
+  }
+}
+
+注意：
+- 兼容旧版本API：若仅传 `amount`，等价于 `final_amount`
+- 支持传入 `openid/unionid`，当提供 `openid` 时后端会优先以其匹配/创建用户，`registration_source` 会标记为 `wechat_payment`
+- 当 `payment_method` 为 `wechat` 且后端配置已启用，会自动生成并返回 JSAPI 调起参数 `paymentConfig`（包含 appId、timeStamp、nonceStr、package、signType、paySign）供前端 `WeixinJSBridge.invoke('getBrandWCPayRequest', ...)` 使用
+- 在开发环境中，若无真实 `prepay_id`，后端会生成模拟的 `prepay_id` 用于联调；生产环境请对接真实微信支付下单与签名逻辑
+- 接口统一返回 `{ success, data }` 包装
+```
+
+// ... existing code ...
+
+#### 获取支付订单
+```
+GET /api/payment-orders/:id
+响应: { success: boolean, data: PaymentOrder }
+```
+
+#### 更新支付订单状态
+```
+PUT /api/payment-orders/:orderId
+Body: {
+  payment_status?: number,            // 支付状态
+  trade_no?: string,                  // 交易号
+  prepay_id?: string,                 // 预支付ID
+  payment_time?: string,              // 支付时间，建议使用 'YYYY-MM-DD HH:MM:SS' 格式；也支持 ISO 字符串(如 2025-08-11T04:59:59.000Z)，后端会自动转换为 MySQL TIMESTAMP
+  payment_method?: string,            // 支付方式
+  discount_amount?: number,           // 折扣金额
+  final_amount?: number,              // 最终金额
+  currency?: string,                  // 货币类型
+  remark?: string,                    // 备注
+  ip_address?: string,                // IP地址
+  user_agent?: string                 // 用户代理
+}
+响应: { success: boolean, data: PaymentOrder }
+```
+
+#### 获取用户支付订单
+```
+GET /api/payment-orders/user/:userId
+响应: PaymentOrder[]
+```
+
+### 用户行为日志接口 (/api/user-behavior-logs)
+
+#### 创建用户行为日志
+```
+POST /api/user-behavior-logs
+Body: {
+  user_id: string,
+  session_id?: string,
+  action: string,
+  page: string,
+  details?: any
+}
+响应: UserBehaviorLog
+```
+
+#### 获取用户行为日志
+```
+GET /api/user-behavior-logs/:userId
+响应: UserBehaviorLog[]
 ```
 
 ## 本地存储服务 (LocalStorageService)

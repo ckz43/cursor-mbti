@@ -473,6 +473,33 @@ export class LocalStorageService {
     return newOrder;
   }
 
+  async updatePaymentOrder(id: number, updateData: Partial<PaymentOrder>): Promise<PaymentOrder | null> {
+    const orders = this.getStorageData<PaymentOrder>(STORAGE_KEYS.PAYMENTS);
+    const orderIndex = orders.findIndex(order => order.id === id);
+    
+    if (orderIndex === -1) {
+      return null;
+    }
+    
+    const updatedOrder = {
+      ...orders[orderIndex],
+      ...updateData,
+      updated_at: new Date()
+    };
+    
+    orders[orderIndex] = updatedOrder;
+    this.setStorageData(STORAGE_KEYS.PAYMENTS, orders);
+    
+    // 添加到同步队列
+    this.addToSyncQueue({
+      type: 'payment',
+      action: 'update',
+      data: { id, ...updateData }
+    });
+    
+    return updatedOrder;
+  }
+
   // 分享记录相关操作
   async createShareRecord(shareData: Omit<ShareRecord, 'id' | 'created_at'>): Promise<ShareRecord> {
     const shares = this.getStorageData<ShareRecord>(STORAGE_KEYS.SHARES);
